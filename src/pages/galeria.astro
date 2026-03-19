@@ -1,13 +1,13 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import { getCollection } from 'astro:content';
+import galleryData from '../data/gallery.json';
 
-const allItems = await getCollection('gallery');
-const portfolioItems = allItems.map(item => ({
-  id: item.id,
-  src: item.data.image,
-  alt: item.data.title,
-  category: item.data.category,
+const rawItems = galleryData.items || [];
+const portfolioItems = rawItems.map((item, index) => ({
+  id: `item-${index}`,
+  src: item.image,
+  alt: item.title,
+  category: item.category,
   width: 800,
   height: 800 // default uniform height for dynamic content since image parsing isn't synchronous without an integration
 }));

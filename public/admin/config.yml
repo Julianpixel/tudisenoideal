@@ -9,19 +9,7 @@ public_folder: "/uploads"
 
 logo_url: "/favicon.svg"
 
-collections:
-  - name: "gallery"
-    label: "Galería de Trabajos"
-    folder: "src/content/gallery"
-    create: true
-    slug: "{{year}}-{{month}}-{{title}}"
-    editor:
-      preview: true
-    fields:
-      - { label: "Título", name: "title", widget: "string" }
-      - { label: "Categoría", name: "category", widget: "select", options: ["globos", "resina", "letreros", "styrofoam", "eventos", "otros"] }
-      - { label: "Imagen", name: "image", widget: "image" }
-      - { label: "Cuerpo/Descripción (Opcional)", name: "body", widget: "markdown", required: false }
+
 
   - name: "pages"
     label: "Páginas y Textos"
@@ -38,5 +26,18 @@ collections:
           - { label: "Texto Sobre Nosotros", name: "aboutText", widget: "text" }
           - { label: "Email de Contacto", name: "contactEmail", widget: "string" }
           - { label: "Teléfono (Mostrar)", name: "contactPhoneLabel", widget: "string" }
-          - { label: "Teléfono (WhatsApp Ej: 18091234567)", name: "contactPhoneUrl", widget: "string" }
           - { label: "Texto Footer / Derechos", name: "footerCopyright", widget: "string" }
+
+      - label: "Administrador de Galería"
+        name: "gallery_manager"
+        file: "src/data/gallery.json"
+        description: "El máximo de imágenes permitidas en la web es de 50. Para añadir nuevas si llegas a 50, deberás borrar una imagen aquí primero."
+        fields:
+          - label: "Proyectos en Galería"
+            name: "items"
+            widget: "list"
+            max: 50
+            fields:
+              - { label: "Título", name: "title", widget: "string" }
+              - { label: "Categoría", name: "category", widget: "select", options: ["globos", "resina", "letreros", "styrofoam", "eventos", "otros"] }
+              - { label: "Fotografía", name: "image", widget: "image" }

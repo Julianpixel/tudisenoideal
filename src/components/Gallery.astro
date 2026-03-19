@@ -1,12 +1,12 @@
 ---
-import { getCollection } from 'astro:content';
+import galleryData from '../data/gallery.json';
 
-const allGalleryItems = await getCollection('gallery');
+const allGalleryItems = galleryData.items || [];
 // Tomamos solo los primeros 4 para el preview del Home
 const images = allGalleryItems.slice(0, 4).map(item => ({
-  src: item.data.image,
-  alt: item.data.title,
-  category: item.data.category
+  src: item.image,
+  alt: item.title,
+  category: item.category
 }));
 ---
 <section class="gallery" id="gallery">
