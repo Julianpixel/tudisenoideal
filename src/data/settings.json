@@ -6,9 +6,9 @@
   "aboutTitle": "Creatividad sin Límites",
   "aboutText": "En Tu Diseño ideal, somos un taller creativo dedicado a transformar ideas en piezas tangibles de decoración. Combinamos materiales como resina, styrofoam y madera para lograr acabados premium.",
   "contactEmail": "hola@tudisenoideal.com",
-  "contactPhoneLabel": "(829) 978-9100",
   "contactPhoneUrl": "18299789100",
-  "footerLogo": "/favicon.svg",
+  "footerLogo": "/uploads/Logo tudisenoideal.png",
   "footerDescription": "Haz de tu evento algo inolvidable.",
-  "footerCopyright": "Sitec Solutions"
+  "footerCopyright": "Sitec Solutions",
+  "contactPhoneLabel": "(829) 978-9100"
 }
