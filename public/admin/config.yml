@@ -1,11 +1,11 @@
 backend:
   name: github
-  repo: Julianpixel/julianpixel.github.io
+  repo: "Julianpixel/tudisenoideal"
   branch: main
   # Sveltia will automatically handle authentication using a generic proxy
 
-site_url: "https://julianpixel.github.io"
-display_url: "https://julianpixel.github.io"
+site_url: "https://tudisenoideal.vercel.app"
+display_url: "https://tudisenoideal.vercel.app"
 
 locale: "es"
 
