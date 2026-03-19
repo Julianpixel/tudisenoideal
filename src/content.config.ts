@@ -1,7 +1,9 @@
 import { defineCollection, z } from 'astro:content';
+import { glob } from 'astro/loaders';
 
 const galleryCollection = defineCollection({
-  type: 'content',
+  // Use the glob loader to load all markdown files from the gallery folder
+  loader: glob({ pattern: "**/*.md", base: "./src/content/gallery" }),
   schema: z.object({
     title: z.string(),
     image: z.string(),

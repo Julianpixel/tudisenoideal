@@ -3,7 +3,7 @@ import { getCollection } from 'astro:content';
 
 const allItems = await getCollection('gallery');
 const portfolioItems = allItems.map(item => ({
-  id: item.slug,
+  id: item.id,
   src: item.data.image,
   alt: item.data.title,
   category: item.data.category,
