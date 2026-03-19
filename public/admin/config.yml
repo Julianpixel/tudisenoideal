@@ -9,8 +9,7 @@ public_folder: "/uploads"
 
 logo_url: "/favicon.svg"
 
-
-
+collections:
   - name: "pages"
     label: "Páginas y Textos"
     files:
