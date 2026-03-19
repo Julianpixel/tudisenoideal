@@ -1,0 +1,24 @@
+backend:
+  name: github
+  repo: Julianpixel/julianpixel.github.io
+  branch: main
+  # Sveltia will automatically handle authentication using a generic proxy
+
+media_folder: "public/uploads"
+public_folder: "/uploads"
+
+logo_url: "/favicon.svg"
+
+collections:
+  - name: "gallery"
+    label: "Galería de Trabajos"
+    folder: "src/content/gallery"
+    create: true
+    slug: "{{year}}-{{month}}-{{title}}"
+    editor:
+      preview: true
+    fields:
+      - { label: "Título", name: "title", widget: "string" }
+      - { label: "Categoría", name: "category", widget: "select", options: ["globos", "resina", "letreros", "styrofoam", "eventos", "otros"] }
+      - { label: "Imagen", name: "image", widget: "image" }
+      - { label: "Cuerpo/Descripción (Opcional)", name: "body", widget: "markdown", required: false }

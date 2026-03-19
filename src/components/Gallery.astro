@@ -1,11 +1,14 @@
+```
 ---
-// Gallery.astro
-const images = [
-  { src: 'https://images.unsplash.com/photo-1530103862676-de8c9debad1d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80', alt: 'Arreglo de Globos', category: 'Globos' },
-  { src: 'https://images.unsplash.com/photo-1519225421980-715cb0215aed?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80', alt: 'Decoración Bodas', category: 'Eventos' },
-  { src: 'https://images.unsplash.com/photo-1561571994-3c61c554181a?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80', alt: 'Letrero Neon', category: 'Letreros' },
-  { src: 'https://images.unsplash.com/photo-1520854221256-17451cc331bf?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80', alt: 'Detalles en Resina', category: 'Resina' }
-];
+import { getCollection } from 'astro:content';
+
+const allGalleryItems = await getCollection('gallery');
+// Tomamos solo los primeros 4 para el preview del Home
+const images = allGalleryItems.slice(0, 4).map(item => ({
+  src: item.data.image,
+  alt: item.data.title,
+  category: item.data.category
+}));
 ---
 <section class="gallery" id="gallery">
   <div class="container">

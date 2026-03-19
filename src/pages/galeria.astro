@@ -1,18 +1,15 @@
----
 import Layout from '../layouts/Layout.astro';
+import { getCollection } from 'astro:content';
 
-// Dummy data for the interactive gallery. This mimics a CMS or future database structure.
-const portfolioItems = [
-  { id: 1, src: 'https://images.unsplash.com/photo-1530103862676-de8c9debad1d?auto=format&fit=crop&w=800&q=80', alt: 'Arreglo de Globos', category: 'globos', width: 800, height: 1000 },
-  { id: 2, src: 'https://images.unsplash.com/photo-1519225421980-715cb0215aed?auto=format&fit=crop&w=800&q=80', alt: 'Decoración Bodas', category: 'eventos', width: 800, height: 600 },
-  { id: 3, src: 'https://images.unsplash.com/photo-1561571994-3c61c554181a?auto=format&fit=crop&w=800&q=80', alt: 'Letrero Neon', category: 'letreros', width: 800, height: 1200 },
-  { id: 4, src: 'https://images.unsplash.com/photo-1520854221256-17451cc331bf?auto=format&fit=crop&w=800&q=80', alt: 'Detalles en Resina', category: 'resina', width: 800, height: 800 },
-  { id: 5, src: 'https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?auto=format&fit=crop&w=800&q=80', alt: 'Mesa Dulce', category: 'eventos', width: 800, height: 900 },
-  { id: 6, src: 'https://images.unsplash.com/photo-1513151233558-d860c5398176?auto=format&fit=crop&w=800&q=80', alt: 'Artesanía', category: 'styrofoam', width: 800, height: 600 },
-  { id: 7, src: 'https://images.unsplash.com/photo-1544457070-4cd773b4d71e?auto=format&fit=crop&w=800&q=80', alt: 'Detalle Premium', category: 'resina', width: 800, height: 1000 },
-  { id: 8, src: 'https://images.unsplash.com/photo-1522064977457-37fbbf545f47?auto=format&fit=crop&w=800&q=80', alt: 'Letras 3D', category: 'styrofoam', width: 800, height: 750 },
-  { id: 9, src: 'https://images.unsplash.com/photo-1511795409834-ef04bbd61622?auto=format&fit=crop&w=800&q=80', alt: 'Fiesta Cumpleaños', category: 'globos', width: 800, height: 800 },
-];
+const allItems = await getCollection('gallery');
+const portfolioItems = allItems.map(item => ({
+  id: item.slug,
+  src: item.data.image,
+  alt: item.data.title,
+  category: item.data.category,
+  width: 800,
+  height: 800 // default uniform height for dynamic content since image parsing isn't synchronous without an integration
+}));
 
 const categories = [
   { val: 'all', label: 'Todos' },
