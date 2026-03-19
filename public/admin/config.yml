@@ -4,6 +4,9 @@ backend:
   branch: main
   # Sveltia will automatically handle authentication using a generic proxy
 
+site_url: "https://julianpixel.github.io"
+display_url: "https://julianpixel.github.io"
+
 locale: "es"
 
 media_folder: "public/uploads"

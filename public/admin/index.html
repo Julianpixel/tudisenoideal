@@ -13,6 +13,18 @@
     body { margin: 0; padding: 0; background: #fcfbf9; font-family: system-ui, sans-serif; }
     #nc-root { min-height: 100vh; }
   </style>
+  <!-- Script para forzar el título y ocultar por completo el nombre de Sveltia en la pestaña -->
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const observer = new MutationObserver(() => {
+        if (!document.title.includes("Tu Diseño ideal")) {
+          document.title = "Panel de Administración | Tu Diseño ideal";
+        }
+      });
+      observer.observe(document.querySelector('head'), { childList: true, subtree: true });
+      document.title = "Panel de Administración | Tu Diseño ideal";
+    });
+  </script>
 </head>
 <body>
 </body>
