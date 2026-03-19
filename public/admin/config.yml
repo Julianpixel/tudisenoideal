@@ -26,7 +26,9 @@ collections:
           - { label: "Título Sobre Nosotros", name: "aboutTitle", widget: "string" }
           - { label: "Texto Sobre Nosotros", name: "aboutText", widget: "text" }
           - { label: "Email de Contacto", name: "contactEmail", widget: "string" }
-          - { label: "Teléfono (Mostrar)", name: "contactPhoneLabel", widget: "string" }
+          - { label: "Teléfono (WhatsApp Ej: 18091234567)", name: "contactPhoneUrl", widget: "string" }
+          - { label: "Logo del Footer", name: "footerLogo", widget: "image", required: false }
+          - { label: "Descripción corta del Footer", name: "footerDescription", widget: "string", required: false }
           - { label: "Texto Footer / Derechos", name: "footerCopyright", widget: "string" }
 
       - label: "Administrador de Galería"

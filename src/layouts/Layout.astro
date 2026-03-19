@@ -68,8 +68,13 @@ const {
     <footer class="footer">
       <div class="container footer-inner">
         <div class="footer-brand">
-          <a href="/" class="logo logo-footer">Tu Diseño <em>ideal</em></a>
-          <p>Haz de tu evento algo inolvidable.</p>
+          <a href="/" class="logo logo-footer" style="display: flex; align-items: center; gap: 0.6rem;">
+            {settings.footerLogo && (
+              <img src={settings.footerLogo} alt="Logo Tu Diseño Ideal" style="width: 40px; height: 40px; object-fit: contain; border-radius: 50%;" />
+            )}
+            <span>Tu Diseño <em>ideal</em></span>
+          </a>
+          <p style="margin-top: 0.8rem;">{settings.footerDescription || "Haz de tu evento algo inolvidable."}</p>
         </div>
         <div class="footer-contact">
           <h4>Contacto</h4>
