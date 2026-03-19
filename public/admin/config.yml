@@ -9,7 +9,7 @@ locale: "es"
 media_folder: "public/uploads"
 public_folder: "/uploads"
 
-logo_url: "/favicon.svg"
+logo_url: "/favicon-new.svg"
 
 collections:
   - name: "pages"
