@@ -1,0 +1,87 @@
+---
+// Marquee.astro
+---
+<div class="marquee-wrapper">
+  <div class="marquee-track">
+    <div class="marquee-content">
+      <span>Diseño 100% Personalizado</span>
+      <span class="dot">•</span>
+      <span>Arreglos con Globos</span>
+      <span class="dot">•</span>
+      <span>Letreros Neón y Acrílico</span>
+      <span class="dot">•</span>
+      <span>Arte en Resina</span>
+      <span class="dot">•</span>
+      <span>Detalles Premium</span>
+      <span class="dot">•</span>
+    </div>
+    <!-- Duplicamos el contenido para el efecto infinito continuo -->
+    <div class="marquee-content" aria-hidden="true">
+      <span>Diseño 100% Personalizado</span>
+      <span class="dot">•</span>
+      <span>Arreglos con Globos</span>
+      <span class="dot">•</span>
+      <span>Letreros Neón y Acrílico</span>
+      <span class="dot">•</span>
+      <span>Arte en Resina</span>
+      <span class="dot">•</span>
+      <span>Detalles Premium</span>
+      <span class="dot">•</span>
+    </div>
+  </div>
+</div>
+
+<style>
+.marquee-wrapper {
+  overflow: hidden;
+  position: relative;
+  background: var(--color-accent-dim);
+  border-top: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border);
+  padding: 1.5rem 0;
+  white-space: nowrap;
+  display: flex;
+}
+
+.marquee-track {
+  display: flex;
+  width: fit-content;
+  animation: marquee-scroll 25s linear infinite;
+}
+
+.marquee-track:hover {
+  animation-play-state: paused;
+}
+
+.marquee-content {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  padding-right: 2rem;
+}
+
+.marquee-content span {
+  font-family: var(--font-serif);
+  font-size: var(--size-xl);
+  font-style: italic;
+  color: var(--color-heading);
+  letter-spacing: 0.02em;
+}
+
+.marquee-content .dot {
+  font-style: normal;
+  color: var(--color-accent-dark);
+  font-size: var(--size-md);
+}
+
+@keyframes marquee-scroll {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+@media (max-width: 768px) {
+  .marquee-content span {
+    font-size: var(--size-lg);
+  }
+}
+</style>

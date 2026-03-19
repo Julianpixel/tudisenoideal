@@ -1,0 +1,123 @@
+---
+const services = [
+  {
+    title: 'Decoraciones en Styrofoam',
+    desc: 'Esculturas, figuras temáticas y letras 3D talladas con precisión para fiestas infantiles o eventos corporativos.',
+    icon: 'M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z M14 2v6h6 M12 18v-6 M9 15h6'
+  },
+  {
+    title: 'Trabajos con Resina',
+    desc: 'Piezas únicas, brillantes y personalizadas. Desde bandejas decorativas hasta recordatorios elegantes y encapsulados.',
+    icon: 'M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z'
+  },
+  {
+    title: 'Letreros Personalizados',
+    desc: 'Nombres en acrílico, neón flex o madera para fondos de fotos (photocall) que destacan en cualquier celebración.',
+    icon: 'M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z'
+  },
+  {
+    title: 'Arreglos con Globos',
+    desc: 'Arcos orgánicos, guirnaldas y columnas diseñadas con combinaciones de colores armoniosas que elevan tu evento.',
+    icon: 'M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z M12 11a2 2 0 1 0 0-4 2 2 0 0 0 0 4z'
+  },
+  {
+    title: 'Detalles para Eventos',
+    desc: 'Papelería creativa, cajitas dulceras, tarjetería y centros de mesa diseñados bajo un mismo concepto estético.',
+    icon: 'M20 12v10H4V12 M2 7h20v5H2z M12 22V7 M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z'
+  }
+];
+---
+<section class="services" id="services">
+  <div class="container services-container">
+    <div class="services-header fade-in">
+      <p class="section-label">Lo que hacemos</p>
+      <h2 class="section-title">Especialistas en <em>celebraciones</em></h2>
+      <p class="services-intro">
+        Ofrecemos una amplia gama de opciones para que tu evento sea exactamente 
+        como lo soñaste. Todo elaborado con dedicación y estilo.
+      </p>
+    </div>
+    
+    <div class="services-grid">
+      {services.map((s, i) => (
+        <article class={`service-card fade-in d-${(i % 3) + 1}`}>
+          <div class="service-icon-wrap">
+            <svg viewBox="0 0 24 24" fill="none" class="service-icon" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d={s.icon}/>
+            </svg>
+          </div>
+          <h3 class="service-title">{s.title}</h3>
+          <p class="service-desc">{s.desc}</p>
+        </article>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+.services {
+  background: var(--color-surface);
+}
+
+.services-header {
+  max-width: 600px;
+  margin-bottom: 4rem;
+}
+
+.services-intro {
+  color: var(--color-text);
+  font-size: var(--size-md);
+  margin-top: -0.5rem;
+}
+
+.services-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 2.5rem;
+}
+
+.service-card {
+  padding: 3rem 2rem;
+  background: var(--color-bg);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border);
+  transition: transform 0.4s ease, box-shadow 0.4s ease;
+  height: 100%;
+}
+
+.service-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 15px 35px rgba(0,0,0,0.06);
+  border-color: rgba(212, 181, 176, 0.5); /* sutil acento al hacer hover */
+}
+
+.service-icon-wrap {
+  width: 60px;
+  height: 60px;
+  background: var(--color-surface);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+  color: var(--color-accent-dark);
+}
+.service-icon {
+  width: 28px;
+  height: 28px;
+}
+
+.service-title {
+  font-family: var(--font-serif);
+  font-size: var(--size-lg);
+  color: var(--color-heading);
+  margin-bottom: 1rem;
+}
+
+.service-desc {
+  font-size: var(--size-sm);
+  color: var(--color-text);
+  line-height: 1.7;
+}
+</style>

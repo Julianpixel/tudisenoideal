@@ -1,0 +1,180 @@
+/* ============================================
+   Global CSS — Tienda de Decoraciones
+   ============================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Lato:wght@300;400;700&display=swap');
+
+/* ---- Design Tokens ---- */
+:root {
+  --color-bg:        #fcfbf9;
+  --color-surface:   #ffffff;
+  --color-border:    #e8e4dc;
+  --color-text:      #4a4543;
+  --color-heading:   #2b2826;
+  --color-accent:    #d4b5b0; /* Soft blush pink/rose */
+  --color-accent-dim:#f7f0ef;
+  --color-accent-dark:#b5938d;
+
+  --font-sans:  'Lato', system-ui, sans-serif;
+  --font-serif: 'Playfair Display', Georgia, serif;
+
+  --size-xs:  0.8rem;
+  --size-sm:  0.9rem;
+  --size-md:  1.05rem;
+  --size-lg:  1.25rem;
+  --size-xl:  1.75rem;
+  --size-2xl: 2.5rem;
+  --size-3xl: 3.5rem;
+  --size-4xl: 4.5rem;
+
+  --radius-sm: 8px;
+  --radius-md: 16px;
+  --radius-lg: 24px;
+  --radius-full: 9999px;
+
+  --transition: 0.3s ease;
+  --max-w: 1200px;
+}
+
+/* ---- Reset ---- */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-sans);
+  font-size: var(--size-md);
+  line-height: 1.6;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+img, video { display: block; max-width: 100%; object-fit: cover; }
+a { color: inherit; text-decoration: none; }
+ul { list-style: none; }
+button { cursor: pointer; border: none; background: none; font: inherit; }
+
+/* ---- Scrollbar ---- */
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: var(--color-bg); }
+::-webkit-scrollbar-thumb { background: var(--color-accent); border-radius: var(--radius-full); }
+
+/* ---- Selection ---- */
+::selection { background: var(--color-accent-dim); color: var(--color-heading); }
+
+/* ---- Standard Utility Classes ---- */
+.container {
+  max-width: var(--max-w);
+  margin-inline: auto;
+  padding-inline: clamp(1.5rem, 5vw, 4rem);
+}
+
+.section-label {
+  font-size: var(--size-xs);
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--color-accent-dark);
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+.section-label::before {
+  content: '';
+  display: block;
+  width: 2rem;
+  height: 1px;
+  background: var(--color-accent);
+}
+
+.section-title {
+  font-family: var(--font-serif);
+  font-size: clamp(var(--size-2xl), 5vw, var(--size-3xl));
+  font-weight: 400;
+  line-height: 1.2;
+  color: var(--color-heading);
+  margin-bottom: 1.5rem;
+}
+.section-title em {
+  font-style: italic;
+  color: var(--color-accent-dark);
+}
+
+section {
+  padding-block: clamp(5rem, 10vw, 8rem);
+}
+
+/* ---- Animations ---- */
+.fade-in {
+  opacity: 0;
+  transform: translateY(40px) scale(0.98);
+  transition: opacity 1s cubic-bezier(0.2, 0.8, 0.2, 1), transform 1s cubic-bezier(0.2, 0.8, 0.2, 1);
+  will-change: opacity, transform;
+}
+.fade-in.visible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+/* Animación de entrada inicial para el hero */
+@keyframes heroFade {
+  from { opacity: 0; transform: translateY(30px) scale(0.98); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes floatAnim {
+  0% { transform: translateY(0); }
+  50% { transform: translateY(-15px); }
+  100% { transform: translateY(0); }
+}
+.float-anim {
+  animation: floatAnim 6s ease-in-out infinite;
+}
+.hero-anim {
+  animation: heroFade 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+.d-1 { animation-delay: 0.1s; }
+.d-2 { animation-delay: 0.2s; }
+.d-3 { animation-delay: 0.3s; }
+.d-4 { animation-delay: 0.4s; }
+
+/* ---- Botones ---- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.8rem 2rem;
+  font-size: var(--size-sm);
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  border-radius: var(--radius-full);
+  transition: all var(--transition);
+}
+
+.btn-primary {
+  background: var(--color-accent-dark);
+  color: white;
+  box-shadow: 0 4px 15px rgba(181, 147, 141, 0.3);
+}
+.btn-primary:hover {
+  background: var(--color-heading);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(43, 40, 38, 0.2);
+}
+
+.btn-outline {
+  border: 1px solid var(--color-accent-dark);
+  color: var(--color-accent-dark);
+}
+.btn-outline:hover {
+  background: var(--color-accent-dark);
+  color: white;
+}
