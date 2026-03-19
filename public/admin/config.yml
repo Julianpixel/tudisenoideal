@@ -4,6 +4,8 @@ backend:
   branch: main
   # Sveltia will automatically handle authentication using a generic proxy
 
+locale: "es"
+
 media_folder: "public/uploads"
 public_folder: "/uploads"
 
