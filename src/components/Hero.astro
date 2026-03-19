@@ -1,17 +1,17 @@
 ---
+import settings from '../data/settings.json';
+---
 // Hero.astro
 ---
 <section class="hero">
   <div class="container hero-container">
     <div class="hero-content">
-      <span class="hero-tag hero-anim d-1">Decoraciones Personalizadas</span>
-      <h1 class="hero-title hero-anim d-2">
-        Creamos la <em>magia</em> para tus mejores momentos.
+      <div class="hero-tag fade-in float-anim">{settings.heroTag}</div>
+      <h1 class="hero-title fade-in d-1" id="hero-heading">
+        {settings.heroTitle}
       </h1>
-      <p class="hero-subtitle hero-anim d-3">
-        Transformamos tus ideas en decoraciones únicas y memorables. 
-        Especialistas en letreros, trabajos en styrofoam, resina y arreglos 
-        exclusivos para eventos especiales.
+      <p class="hero-subtitle fade-in d-2">
+        {settings.heroSubtitle}
       </p>
       <div class="hero-actions hero-anim d-4">
         <a href="#gallery" class="btn btn-primary">Ver trabajos</a>
@@ -23,8 +23,8 @@
       <div class="image-wrapper">
         <!-- Placeholder elegante simulando una decoración con globos / letrero neon -->
         <img 
-          src="https://images.unsplash.com/photo-1530103862676-de8c9debad1d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" 
-          alt="Decoración de evento elegante" 
+          src={settings.heroImage} 
+          alt="Decoración hero" 
           class="hero-img float-anim"
           style="animation-duration: 8s"
         />

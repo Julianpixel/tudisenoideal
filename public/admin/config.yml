@@ -22,3 +22,21 @@ collections:
       - { label: "Categoría", name: "category", widget: "select", options: ["globos", "resina", "letreros", "styrofoam", "eventos", "otros"] }
       - { label: "Imagen", name: "image", widget: "image" }
       - { label: "Cuerpo/Descripción (Opcional)", name: "body", widget: "markdown", required: false }
+
+  - name: "pages"
+    label: "Páginas y Textos"
+    files:
+      - label: "Configuración General"
+        name: "settings"
+        file: "src/data/settings.json"
+        fields:
+          - { label: "Etiqueta Hero", name: "heroTag", widget: "string" }
+          - { label: "Título Principal Hero", name: "heroTitle", widget: "string" }
+          - { label: "Subtítulo Hero", name: "heroSubtitle", widget: "string" }
+          - { label: "Imagen Hero", name: "heroImage", widget: "image" }
+          - { label: "Título Sobre Nosotros", name: "aboutTitle", widget: "string" }
+          - { label: "Texto Sobre Nosotros", name: "aboutText", widget: "text" }
+          - { label: "Email de Contacto", name: "contactEmail", widget: "string" }
+          - { label: "Teléfono (Mostrar)", name: "contactPhoneLabel", widget: "string" }
+          - { label: "Teléfono (WhatsApp Ej: 18091234567)", name: "contactPhoneUrl", widget: "string" }
+          - { label: "Texto Footer / Derechos", name: "footerCopyright", widget: "string" }

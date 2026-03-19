@@ -1,4 +1,6 @@
 ---
+import settings from '../data/settings.json';
+---
 // About.astro
 ---
 <section class="about" id="about">
@@ -17,13 +19,11 @@
       </div>
     </div>
     
-    <div class="about-content fade-in">
-      <p class="section-label">Sobre Nosotros</p>
-      <h2 class="section-title">Diseñamos detalles que <em>inspiran</em></h2>
-      <div class="about-text">
-        <p>
-          En <strong>Tu Diseño ideal</strong>, somos un taller creativo dedicado a transformar ideas 
-          intrincadas en objetos decorativos tangibles y hermosos. Nos apasiona el arte de celebrar la vida.
+    <div class="about-text-content fade-in d-2">
+        <p class="section-label">Sobre Nosotros</p>
+        <h2 class="section-title">{settings.aboutTitle}</h2>
+        <p class="about-desc">
+          {settings.aboutText}
         </p>
         <p>
           Cada proyecto es trabajado con máxima dedicación, combinando técnicas artesanales con 
