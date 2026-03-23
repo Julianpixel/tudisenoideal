@@ -31,7 +31,7 @@ const hasMore = images.length > PREVIEW_COUNT;
       <div class="gallery-grid" id="gallery-grid">
         {previewImages.map((img, i) => (
           <div
-            class="gallery-item"
+            class={`gallery-item ${img.orientation && img.orientation !== 'auto' ? `orient-${img.orientation}` : ''}`}
             style={`animation-delay: ${i * 0.1}s`}
             data-src={img.url}
             data-caption={img.caption || ''}
@@ -158,6 +158,8 @@ const hasMore = images.length > PREVIEW_COUNT;
     from { opacity: 0; transform: translateY(20px); } 
     to { opacity: 1; transform: translateY(0); } 
   }
+  .gallery-item.orient-horizontal { grid-row: span 1; }
+  .gallery-item.orient-vertical { grid-row: span 2; }
   .gallery-item img {
     width: 100%;
     height: auto;

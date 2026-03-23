@@ -31,12 +31,12 @@ const { heroTitle, heroSubtitle, receptionVenue } = Astro.props;
     </div>
 
     <p class="date-line">{heroSubtitle}</p>
-    <p class="venue-line">{receptionVenue} · Valle Verde</p>
-
-    <div class="hero-cta">
-      <a href="#rsvp" class="btn">Confirmar Asistencia</a>
-      <a href="#galeria" class="btn btn-outline-hero">Ver Momentos</a>
-    </div>
+    <div class="hero-content">
+    <div class="elegant-badge">¡Nos Casamos!</div>
+    <h1 class="hero-title">{heroTitle}</h1>
+    <p class="hero-subtitle">{heroSubtitle}</p>
+    <a href="#rsvp" class="btn btn-outline btn-hero">Confirma tu asistencia</a>
+  </div>
   </div>
 
   <div class="scroll-hint" aria-hidden="true">

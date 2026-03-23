@@ -1,5 +1,8 @@
----
 import '../styles/global.css';
+import { db, Settings } from 'astro:db';
+
+const settingsRows = await db.select().from(Settings).limit(1);
+const s = settingsRows[0] || { heroTitle: 'Julian & Leandri', heroSubtitle: '20 de Diciembre, 2026' };
 ---
 <!doctype html>
 <html lang="es">
@@ -8,7 +11,7 @@ import '../styles/global.css';
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="generator" content={Astro.generator} />
-    <title>Elias & María — 20 de Diciembre, 2026</title>
+    <title>{s.heroTitle} — {s.heroSubtitle}</title>
     <meta name="description" content="Te invitamos a celebrar nuestra boda. Confirma tu asistencia y únete a este momento especial." />
   </head>
   <body>
@@ -16,8 +19,8 @@ import '../styles/global.css';
     <!-- Footer with donations link and subtle admin access -->
     <footer class="site-footer">
       <div class="footer-inner">
-        <p class="footer-brand">Elias & María</p>
-        <p class="footer-tagline">Unidos para siempre · 20 de Diciembre, 2026</p>
+        <p class="footer-brand">{s.heroTitle}</p>
+        <p class="footer-tagline">Unidos para siempre · {s.heroSubtitle}</p>
         <nav class="footer-links">
           <a href="/donaciones" class="footer-link">💛 Lluvia de Sobres</a>
           <a href="/galeria" class="footer-link">📸 Galería</a>

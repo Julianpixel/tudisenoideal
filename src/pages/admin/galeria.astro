@@ -26,6 +26,32 @@ if (Astro.request.method === 'POST') {
         await mkdir(dir, { recursive: true });
         await writeFile(path.join(dir, filename), buffer);
 
+        // Subida a GitHub si el Token existe (para Vercel CI/CD)
+        const githubToken = import.meta.env.GITHUB_TOKEN;
+        if (githubToken) {
+          const repo = 'Julianpixel/wedding_site';
+          const apiUrl = `https://api.github.com/repos/${repo}/contents/public/gallery/${filename}`;
+          
+          const response = await fetch(apiUrl, {
+            method: 'PUT',
+            headers: {
+              'Authorization': `Bearer ${githubToken}`,
+              'Content-Type': 'application/json',
+              'User-Agent': 'Astro-Wedding-Admin'
+            },
+            body: JSON.stringify({
+              message: `Upload gallery image: ${filename}`,
+              content: buffer.toString('base64'),
+              branch: 'main'
+            })
+          });
+
+          if (!response.ok) {
+            const err = await response.json();
+            throw new Error(`GitHub Upload Falló: ${err.message}`);
+          }
+        }
+
         const allImages = await db.select().from(GalleryImage);
         const maxOrder  = allImages.reduce((m, i) => Math.max(m, i.order), 0);
         await db.insert(GalleryImage).values({ url: `/gallery/${filename}`, caption, order: maxOrder + 1 });
@@ -40,6 +66,12 @@ if (Astro.request.method === 'POST') {
     const id = parseInt(form.get('imageId') as string, 10);
     await db.delete(GalleryImage).where(eq(GalleryImage.id, id));
     successMsg = '✓ Imagen eliminada.';
+  } else if (action === 'update') {
+    const id = parseInt(form.get('imageId') as string, 10);
+    const order = parseInt(form.get('order') as string, 10) || 0;
+    const orientation = form.get('orientation') as string || 'auto';
+    await db.update(GalleryImage).set({ order, orientation }).where(eq(GalleryImage.id, id));
+    successMsg = '✓ Imagen actualizada.';
   }
 }
 
@@ -71,11 +103,11 @@ import Sidebar from '../../components/admin/Sidebar.astro';
           <div class="upload-fields">
             <div class="form-group">
               <label for="image">Imagen (JPG/PNG/WEBP)</label>
-              <input type="file" id="image" name="image" accept="image/*" required />
+              <input type="file" id="image" name="image" accept="image/jpeg, image/png, image/webp" required />
             </div>
             <div class="form-group">
               <label for="caption">Pie de foto (opcional)</label>
-              <input type="text" id="caption" name="caption" placeholder="Descripción de la foto…" />
+              <input type="text" id="caption" name="caption" placeholder="Descripcion de la foto" />
             </div>
           </div>
           <button type="submit" class="btn btn-forest">Subir Imagen</button>
@@ -96,12 +128,26 @@ import Sidebar from '../../components/admin/Sidebar.astro';
               <img src={img.url} alt={img.caption || 'Foto'} loading="lazy" />
               <div class="item-info">
                 <p class="item-caption">{img.caption || <em>Sin pie de foto</em>}</p>
-                <form method="POST">
-                  <input type="hidden" name="_action" value="delete" />
+                <form method="POST" class="inline-edit">
                   <input type="hidden" name="imageId" value={img.id} />
-                  <button type="submit" class="btn-delete" onclick="return confirm('¿Eliminar esta imagen?')">
-                    🗑 Eliminar
-                  </button>
+                  <div class="edit-row">
+                    <div>
+                      <label>Orden:</label>
+                      <input type="number" name="order" value={img.order} min="0" />
+                    </div>
+                    <div>
+                      <label>Tipo:</label>
+                      <select name="orientation">
+                        <option value="auto" selected={img.orientation === 'auto'}>Auto</option>
+                        <option value="vertical" selected={img.orientation === 'vertical'}>Vertical</option>
+                        <option value="horizontal" selected={img.orientation === 'horizontal'}>Horiz</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="action-row">
+                    <button type="submit" name="_action" value="update" class="btn-save btn-sm">Guardar</button>
+                    <button type="submit" name="_action" value="delete" class="btn-delete btn-sm" onclick="return confirm('Confirmar eliminar');">Borrar</button>
+                  </div>
                 </form>
               </div>
             </div>
@@ -141,8 +187,18 @@ import Sidebar from '../../components/admin/Sidebar.astro';
   .gallery-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1.25rem; }
   .gallery-item { border: 1px solid #f0f0f0; border-radius: 12px; overflow: hidden; }
   .gallery-item img { width: 100%; height: 160px; object-fit: cover; display: block; }
-  .item-info { padding: 0.75rem; display: flex; flex-direction: column; gap: 0.5rem; }
-  .item-caption { font-size: 0.82rem; color: #555; margin: 0; font-style: italic; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .btn-delete { background: none; border: 1px solid #f1b4b0; border-radius: 6px; color: #c0392b; font-size: 0.75rem; cursor: pointer; padding: 0.35rem 0.65rem; transition: all 0.2s; font-family: 'Montserrat', sans-serif; }
+  .item-info { padding: 0.75rem; display: flex; flex-direction: column; gap: 0.75rem; }
+  .item-caption { font-size: 0.82rem; color: #555; margin: 0; font-style: italic; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-bottom: 0.5rem; border-bottom: 1px solid #eee; }
+  
+  .inline-edit { display: flex; flex-direction: column; gap: 0.5rem; }
+  .edit-row { display: flex; gap: 0.5rem; background: #fafafa; padding: 0.5rem; border-radius: 8px; border: 1px solid #f0f0f0; }
+  .edit-row div { display: flex; flex-direction: column; gap: 0.2rem; flex: 1; }
+  .edit-row label { font-size: 0.65rem; color: #888; }
+  .edit-row input, .edit-row select { width: 100%; padding: 0.3rem; border: 1px solid #ddd; border-radius: 4px; font-size: 0.75rem; font-family: 'Montserrat', sans-serif; }
+  
+  .action-row { display: flex; gap: 0.5rem; }
+  .btn-save { flex: 1; background: #e6f4ea; border: 1px solid #a9dfbf; border-radius: 6px; color: #1e8449; font-size: 0.75rem; cursor: pointer; padding: 0.35rem 0; font-family: 'Montserrat', sans-serif; font-weight: 600; transition: all 0.2s; }
+  .btn-save:hover { background: #d4edd9; }
+  .btn-delete { flex: 1; background: none; border: 1px solid #f1b4b0; border-radius: 6px; color: #c0392b; font-size: 0.75rem; cursor: pointer; padding: 0.35rem 0; transition: all 0.2s; font-family: 'Montserrat', sans-serif; }
   .btn-delete:hover { background: #fdecea; }
 </style>

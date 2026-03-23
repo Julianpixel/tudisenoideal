@@ -138,14 +138,13 @@ export const server = {
       input: z.object({
         uniqueCode: z.string().min(3),
         status: z.enum(['confirmed', 'declined']),
-        partySize: z.coerce.number().min(1).default(1),
         dietaryRestrictions: z.string().optional(),
         notes: z.string().optional()
       }),
       handler: async (input) => {
         const [guest] = await db.select().from(Guest).where(eq(Guest.uniqueCode, input.uniqueCode));
         if (!guest) throw new Error('Código de invitado no válido.');
-        await db.update(Guest).set({ status: input.status, partySize: input.partySize, updatedAt: new Date() }).where(eq(Guest.uniqueCode, input.uniqueCode));
+        await db.update(Guest).set({ status: input.status, updatedAt: new Date() }).where(eq(Guest.uniqueCode, input.uniqueCode));
         return { success: true, message: 'RSVP guardado correctamente.' };
       }
     }),
