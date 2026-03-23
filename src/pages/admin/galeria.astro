@@ -155,6 +155,99 @@ images.sort((a, b) => a.order - b.order);
   </div>
 </Layout>
 
+<script>
+  const form = document.querySelector('.upload-form') as HTMLFormElement;
+  if (form) {
+    form.addEventListener('submit', async (e) => {
+      const fileInput = form.querySelector('input[name="image"]') as HTMLInputElement;
+      if (!fileInput || !fileInput.files || fileInput.files.length === 0) return;
+
+      const file = fileInput.files[0];
+      // Vercel limit is 4.5MB. Compression if > 4MB.
+      if (file.size > 4 * 1024 * 1024) {
+        e.preventDefault();
+        const btn = form.querySelector('button[type="submit"]') as HTMLButtonElement;
+        const originalText = btn.innerText;
+        btn.disabled = true;
+        btn.innerText = 'Comprimiendo...';
+
+        try {
+          const compressedBlob = await compressImage(file);
+          
+          // Create a new FormData and manually fetch because we can't easily replace file in standard submit
+          const formData = new FormData(form);
+          formData.set('image', compressedBlob, file.name);
+
+          const response = await fetch(form.action || window.location.href, {
+            method: 'POST',
+            body: formData
+          });
+
+          if (response.ok) {
+            window.location.reload();
+          } else {
+            alert('Error al subir la imagen comprimida. Intenta con una más pequeña.');
+            btn.disabled = false;
+            btn.innerText = originalText;
+          }
+        } catch (err) {
+          console.error(err);
+          alert('Error en la compresión.');
+          btn.disabled = false;
+          btn.innerText = originalText;
+        }
+      }
+    });
+
+    async function compressImage(file: File): Promise<Blob> {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = (event) => {
+          const img = new Image();
+          img.src = event.target?.result as string;
+          img.onload = () => {
+            const canvas = document.createElement('canvas');
+            let width = img.width;
+            let height = img.height;
+
+            // Maximum dimensions to keep it sane
+            const MAX_WIDTH = 2500;
+            const MAX_HEIGHT = 2500;
+
+            if (width > height) {
+              if (width > MAX_WIDTH) {
+                height *= MAX_WIDTH / width;
+                width = MAX_WIDTH;
+              }
+            } else {
+              if (height > MAX_HEIGHT) {
+                width *= MAX_HEIGHT / height;
+                height = MAX_HEIGHT;
+              }
+            }
+
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            ctx?.drawImage(img, 0, 0, width, height);
+
+            canvas.toBlob(
+              (blob) => {
+                if (blob) resolve(blob);
+                else reject(new Error('Canvas toBlob failed'));
+              },
+              'image/jpeg',
+              0.8 // 80% quality
+            );
+          };
+        };
+        reader.onerror = (err) => reject(err);
+      });
+    }
+  }
+</script>
+
 <style>
   .admin-shell { display: flex; min-height: 100vh; background: #f4f5f7; font-family: 'Montserrat', sans-serif; }
   .admin-main { flex: 1; padding: 2.5rem 2rem; overflow-y: auto; }
