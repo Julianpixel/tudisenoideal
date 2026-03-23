@@ -1,0 +1,81 @@
+---
+export const prerender = false;
+import Layout from '../layouts/Layout.astro';
+import Hero from '../components/Hero.astro';
+import EventDetails from '../components/EventDetails.astro';
+import MapSection from '../components/MapSection.astro';
+import RSVPForm from '../components/RSVPForm.astro';
+import Countdown from '../components/Countdown.astro';
+import Gallery from '../components/Gallery.astro';
+import { db, Settings, GalleryImage } from 'astro:db';
+
+// Load settings
+const settingsRows = await db.select().from(Settings);
+const s = settingsRows[0] ?? {
+  weddingDate: '2026-12-20',
+  heroTitle: 'Elias & María',
+  heroSubtitle: '20 de Diciembre, 2026',
+  ceremonyTime: '16:00',
+  receptionTime: '18:00',
+  ceremonyVenue: 'Parroquia de San Miguel',
+  ceremonyAddress: 'Av. Principal 123, Centro',
+  receptionVenue: 'Hacienda La Estancia',
+  receptionAddress: 'Camino Real km 4.5',
+  mapEmbedUrl: '',
+};
+
+// Load gallery
+const galleryImages = await db.select().from(GalleryImage);
+galleryImages.sort((a, b) => a.order - b.order);
+---
+<Layout>
+  <Hero
+    heroTitle={s.heroTitle}
+    heroSubtitle={s.heroSubtitle}
+    weddingDate={s.weddingDate}
+    receptionVenue={s.receptionVenue}
+  />
+  <EventDetails
+    ceremonyTime={s.ceremonyTime}
+    receptionTime={s.receptionTime}
+    ceremonyVenue={s.ceremonyVenue}
+    ceremonyAddress={s.ceremonyAddress}
+    receptionVenue={s.receptionVenue}
+    receptionAddress={s.receptionAddress}
+  />
+  <Countdown weddingDate={s.weddingDate} />
+  <div id="galeria">
+    <Gallery images={galleryImages} />
+  </div>
+  <MapSection
+    receptionVenue={s.receptionVenue}
+    receptionAddress={s.receptionAddress}
+    mapEmbedUrl={s.mapEmbedUrl}
+  />
+
+  <!-- Donations CTA -->
+  <section class="donation-cta fade-up">
+    <div class="donation-cta-inner">
+      <span class="donation-icon">💛</span>
+      <div>
+        <h3 class="donation-title">Lluvia de Sobres</h3>
+        <p class="donation-subtitle">Tu presencia es nuestro mayor regalo. Sin embargo, si deseas hacernos un regalo especial, aquí encontrarás nuestros datos.</p>
+      </div>
+      <a href="/donaciones" class="btn-donation">Ver datos bancarios →</a>
+    </div>
+  </section>
+
+  <RSVPForm />
+</Layout>
+
+<script>
+  // Intersection Observer for fade-up animations
+  document.addEventListener('DOMContentLoaded', () => {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) entry.target.classList.add('visible');
+      });
+    }, { threshold: 0.08, rootMargin: '0px 0px -50px 0px' });
+    document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+  });
+</script>

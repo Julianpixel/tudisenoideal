@@ -1,0 +1,201 @@
+---
+export const prerender = false;
+import Layout from '../../layouts/Layout.astro';
+import Sidebar from '../../components/admin/Sidebar.astro';
+import { db, GalleryImage } from 'astro:db';
+import { writeFile, mkdir } from 'node:fs/promises';
+import path from 'node:path';
+import { eq } from 'astro:db';
+
+let successMsg = '';
+let errorMsg   = '';
+
+if (Astro.request.method === 'POST') {
+  const form = await Astro.request.formData();
+  const action = form.get('_action') as string;
+
+  if (action === 'upload') {
+    const file    = form.get('image') as File | null;
+    const caption = (form.get('caption') as string) || null;
+
+    if (file && file.size > 0) {
+      try {
+        const buffer   = Buffer.from(await file.arrayBuffer());
+        const ext      = file.name.split('.').pop()?.toLowerCase() || 'jpg';
+        const filename = `${Date.now()}.${ext}`;
+        const dir      = path.join(process.cwd(), 'public', 'gallery');
+        await mkdir(dir, { recursive: true });
+        await writeFile(path.join(dir, filename), buffer);
+
+        // Subida a GitHub si el Token existe (para Vercel CI/CD)
+        const githubToken = import.meta.env.GITHUB_TOKEN;
+        if (githubToken) {
+          const repo = 'Julianpixel/wedding_site';
+          const apiUrl = `https://api.github.com/repos/${repo}/contents/public/gallery/${filename}`;
+          
+          const response = await fetch(apiUrl, {
+            method: 'PUT',
+            headers: {
+              'Authorization': `Bearer ${githubToken}`,
+              'Content-Type': 'application/json',
+              'User-Agent': 'Astro-Wedding-Admin'
+            },
+            body: JSON.stringify({
+              message: `Upload gallery image: ${filename}`,
+              content: buffer.toString('base64'),
+              branch: 'main'
+            })
+          });
+
+          if (!response.ok) {
+            const err = await response.json();
+            throw new Error(`GitHub Upload Falló: ${err.message}`);
+          }
+        }
+
+        const allImages = await db.select().from(GalleryImage);
+        const maxOrder  = allImages.reduce((m, i) => Math.max(m, i.order), 0);
+        await db.insert(GalleryImage).values({ url: `/gallery/${filename}`, caption, order: maxOrder + 1 });
+        successMsg = '✓ Imagen subida correctamente.';
+      } catch (e) {
+        errorMsg = `Error al subir: ${e instanceof Error ? e.message : 'Error desconocido'}`;
+      }
+    } else {
+      errorMsg = 'Por favor selecciona una imagen válida.';
+    }
+  } else if (action === 'delete') {
+    const id = parseInt(form.get('imageId') as string, 10);
+    await db.delete(GalleryImage).where(eq(GalleryImage.id, id));
+    successMsg = '✓ Imagen eliminada.';
+  } else if (action === 'update') {
+    const id = parseInt(form.get('imageId') as string, 10);
+    const order = parseInt(form.get('order') as string, 10) || 0;
+    const orientation = form.get('orientation') as string || 'auto';
+    await db.update(GalleryImage).set({ order, orientation }).where(eq(GalleryImage.id, id));
+    successMsg = '✓ Imagen actualizada.';
+  }
+}
+
+const images = await db.select().from(GalleryImage);
+images.sort((a, b) => a.order - b.order);
+---
+<Layout>
+  <div class="admin-shell">
+    <Sidebar currentPath="/admin/galeria" />
+
+    <main class="admin-main">
+      <header class="admin-header">
+        <div>
+          <p class="header-eyebrow">Panel de Administración</p>
+          <h1 class="header-title">Galería de Imágenes</h1>
+        </div>
+        <a href="/" class="btn btn-forest btn-sm" target="_blank">Ver Sitio →</a>
+      </header>
+
+      {successMsg && <div class="alert alert-success">{successMsg}</div>}
+      {errorMsg   && <div class="alert alert-error">{errorMsg}</div>}
+
+      <!-- Upload form -->
+      <div class="upload-card">
+        <h3 class="card-title">Subir Imagen</h3>
+        <form method="POST" enctype="multipart/form-data" class="upload-form">
+          <input type="hidden" name="_action" value="upload" />
+          
+          <label>Imagen</label>
+          <input type="file" name="image" accept="image/jpeg, image/png, image/webp" required />
+          
+          <label>Leyenda</label>
+          <input type="text" name="caption" />
+          
+          <button type="submit" class="btn btn-forest">Subir</button>
+        </form>
+      </div>
+
+      <!-- Gallery grid -->
+      <div class="gallery-admin">
+        <div class="gallery-header">
+          <h3 class="card-title">📷 Imágenes Actuales ({images.length})</h3>
+        </div>
+        {images.length === 0 && (
+          <div class="empty-state">No hay imágenes en la galería todavía.</div>
+        )}
+        <div class="gallery-grid">
+          {images.map(img => (
+            <div class="gallery-item">
+              <img src={img.url} alt={img.caption || 'Foto'} loading="lazy" />
+              <div class="item-info">
+                <p class="item-caption">{img.caption || <em>Sin pie de foto</em>}</p>
+                <form method="POST" class="inline-edit">
+                  <input type="hidden" name="imageId" value={img.id} />
+                  <div class="edit-row">
+                    <div>
+                      <label>Orden:</label>
+                      <input type="number" name="order" value={img.order} min="0" />
+                    </div>
+                    <div>
+                      <label>Tipo:</label>
+                      <select name="orientation">
+                        <option value="auto" selected={img.orientation === 'auto'}>Auto</option>
+                        <option value="vertical" selected={img.orientation === 'vertical'}>Vertical</option>
+                        <option value="horizontal" selected={img.orientation === 'horizontal'}>Horiz</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="action-row">
+                    <button type="submit" name="_action" value="update" class="btn-save btn-sm">Guardar</button>
+                    <button type="submit" name="_action" value="delete" class="btn-delete btn-sm" onclick="return confirm('Confirmar eliminar');">Borrar</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </main>
+  </div>
+</Layout>
+
+<style>
+  .admin-shell { display: flex; min-height: 100vh; background: #f4f5f7; font-family: 'Montserrat', sans-serif; }
+  .admin-main { flex: 1; padding: 2.5rem 2rem; overflow-y: auto; }
+  .admin-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem; }
+  .header-eyebrow { font-size: 0.7rem; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase; color: var(--color-gold); margin: 0 0 0.25rem; }
+  .header-title { font-family: 'Cormorant Garamond', serif; font-size: 2.2rem; font-weight: 400; color: var(--color-forest); margin: 0; }
+  .alert { padding: 0.85rem 1.25rem; border-radius: 10px; font-size: 0.85rem; font-weight: 500; margin-bottom: 1.5rem; }
+  .alert-success { background: #e6f6ec; color: #1e8449; border: 1px solid #a9dfbf; }
+  .alert-error   { background: #fdecea; color: #c0392b; border: 1px solid #f1b4b0; }
+  .upload-card { background: #fff; border-radius: 14px; padding: 2rem; margin-bottom: 2rem; box-shadow: 0 2px 12px rgba(44,74,62,0.06); }
+  .card-title { font-family: 'Cormorant Garamond', serif; font-size: 1.3rem; color: var(--color-forest); margin: 0 0 1.5rem; border-bottom: 1px solid #f0f0f0; padding-bottom: 0.75rem; }
+  .upload-form { display: flex; flex-direction: column; gap: 1rem; }
+  .upload-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  @media (max-width: 600px) { .upload-fields { grid-template-columns: 1fr; } }
+  .form-group { display: flex; flex-direction: column; gap: 0.4rem; }
+  label { font-size: 0.72rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: #555; }
+  input[type="file"] { padding: 0.5rem; border: 1.5px dashed #c9a96e; border-radius: 10px; background: #faf6f0; cursor: pointer; font-size: 0.85rem; }
+  input[type="text"] { padding: 0.8rem 1rem; border: 1.5px solid #e0e0e0; border-radius: 10px; font-family: 'Montserrat', sans-serif; font-size: 0.9rem; }
+  input[type="text"]:focus { outline: none; border-color: var(--color-gold); }
+  .btn { display: inline-flex; align-items: center; justify-content: center; padding: 0.85rem 2rem; font-size: 0.82rem; font-family: 'Montserrat', sans-serif; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; border-radius: 50px; cursor: pointer; border: 2px solid; transition: all 0.25s; text-decoration: none; align-self: flex-start; }
+  .btn-forest { background: var(--color-forest); color: white; border-color: var(--color-forest); }
+  .btn-forest:hover { background: transparent; color: var(--color-forest); }
+  .btn-sm { padding: 0.55rem 1.1rem; font-size: 0.72rem; }
+  .gallery-admin { background: #fff; border-radius: 14px; padding: 2rem; box-shadow: 0 2px 12px rgba(44,74,62,0.06); }
+  .gallery-header { margin-bottom: 1.5rem; }
+  .empty-state { text-align: center; color: #999; padding: 2rem; font-style: italic; }
+  .gallery-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1.25rem; }
+  .gallery-item { border: 1px solid #f0f0f0; border-radius: 12px; overflow: hidden; }
+  .gallery-item img { width: 100%; height: 160px; object-fit: cover; display: block; }
+  .item-info { padding: 0.75rem; display: flex; flex-direction: column; gap: 0.75rem; }
+  .item-caption { font-size: 0.82rem; color: #555; margin: 0; font-style: italic; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-bottom: 0.5rem; border-bottom: 1px solid #eee; }
+  
+  .inline-edit { display: flex; flex-direction: column; gap: 0.5rem; }
+  .edit-row { display: flex; gap: 0.5rem; background: #fafafa; padding: 0.5rem; border-radius: 8px; border: 1px solid #f0f0f0; }
+  .edit-row div { display: flex; flex-direction: column; gap: 0.2rem; flex: 1; }
+  .edit-row label { font-size: 0.65rem; color: #888; }
+  .edit-row input, .edit-row select { width: 100%; padding: 0.3rem; border: 1px solid #ddd; border-radius: 4px; font-size: 0.75rem; font-family: 'Montserrat', sans-serif; }
+  
+  .action-row { display: flex; gap: 0.5rem; }
+  .btn-save { flex: 1; background: #e6f4ea; border: 1px solid #a9dfbf; border-radius: 6px; color: #1e8449; font-size: 0.75rem; cursor: pointer; padding: 0.35rem 0; font-family: 'Montserrat', sans-serif; font-weight: 600; transition: all 0.2s; }
+  .btn-save:hover { background: #d4edd9; }
+  .btn-delete { flex: 1; background: none; border: 1px solid #f1b4b0; border-radius: 6px; color: #c0392b; font-size: 0.75rem; cursor: pointer; padding: 0.35rem 0; transition: all 0.2s; font-family: 'Montserrat', sans-serif; }
+  .btn-delete:hover { background: #fdecea; }
+</style>

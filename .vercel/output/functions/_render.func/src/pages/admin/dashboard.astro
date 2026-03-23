@@ -1,0 +1,275 @@
+---
+export const prerender = false;
+import Layout from '../../layouts/Layout.astro';
+import { db, Guest, Settings, GalleryImage, eq } from 'astro:db';
+
+function normalizeText(text: string): string {
+  return text.trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+}
+
+let importMsg = '';
+let actionMsg = '';
+
+// Handle ALL POST actions directly via DB — no actions API (avoids ActionCalledFromServerError)
+if (Astro.request.method === 'POST') {
+  const form = await Astro.request.formData();
+  const _action = form.get('_action') as string;
+
+  if (_action === 'importCSV') {
+    const csvContent = form.get('csvContent') as string;
+    if (csvContent) {
+      const lines = csvContent.split('\n').map(l => l.trim()).filter(Boolean);
+      const dataLines = lines[0]?.toLowerCase().includes('nombre') ? lines.slice(1) : lines;
+      const allDbGuests = await db.select().from(Guest);
+      let nextId = allDbGuests.reduce((max, g) => Math.max(max, g.id), 0) + 1;
+      let imported = 0;
+      const errors: string[] = [];
+      for (const line of dataLines) {
+        const cols = line.split(',').map(c => c.trim().replace(/^"|"$/g, ''));
+        const name = cols[0]; if (!name) continue;
+        const partySize = parseInt(cols[1] || '1', 10) || 1;
+        const familyGroup = cols[2] || null;
+        const dietaryRestrictions = cols[3] || null;
+        const exists = allDbGuests.find(g => normalizeText(g.name) === normalizeText(name));
+        try {
+          if (exists) {
+            await db.update(Guest).set({ partySize, familyGroup: familyGroup || exists.familyGroup, dietaryRestrictions: dietaryRestrictions || exists.dietaryRestrictions, updatedAt: new Date() }).where(eq(Guest.id, exists.id));
+          } else {
+            const code = `GUEST-${String(nextId).padStart(3, '0')}`;
+            await db.insert(Guest).values({ id: nextId, uniqueCode: code, name, partySize, familyGroup, dietaryRestrictions, status: 'pending', showBibleVerse: false });
+            nextId++;
+          }
+          imported++;
+        } catch (e) { errors.push(`"${name}": ${e instanceof Error ? e.message : 'Error'}`); }
+      }
+      importMsg = `✓ ${imported} invitado(s) importados.${errors.length ? ' Errores: ' + errors.join('; ') : ''}`;
+    }
+  } else if (_action === 'toggleVerse') {
+    const guestId = parseInt(form.get('guestId') as string, 10);
+    const value = form.get('value') === 'true';
+    await db.update(Guest).set({ showBibleVerse: value }).where(eq(Guest.id, guestId));
+    actionMsg = value ? '✓ Versículo bíblico activado.' : '✓ Versículo bíblico desactivado.';
+  } else if (_action === 'resetStatus') {
+    const guestId = parseInt(form.get('guestId') as string, 10);
+    await db.update(Guest).set({ status: 'pending', updatedAt: new Date() }).where(eq(Guest.id, guestId));
+    actionMsg = '✓ Estado restablecido a pendiente.';
+  }
+}
+
+const allGuests = await db.select().from(Guest);
+const galleryCount = (await db.select().from(GalleryImage)).length;
+
+const totalGuests     = allGuests.length;
+const confirmedGuests = allGuests.filter(g => g.status === 'confirmed').reduce((a, g) => a + g.partySize, 0);
+const pendingGuests   = allGuests.filter(g => g.status === 'pending').reduce((a, g) => a + g.partySize, 0);
+const declinedGuests  = allGuests.filter(g => g.status === 'declined').reduce((a, g) => a + g.partySize, 0);
+import Sidebar from '../../components/admin/Sidebar.astro';
+---
+<Layout>
+  <div class="admin-shell">
+    <Sidebar currentPath="/admin/dashboard" />
+
+    <!-- Main -->
+    <main class="admin-main">
+      <header class="admin-header">
+        <div>
+          <p class="header-eyebrow">Panel de Administración</p>
+          <h1 class="header-title">Dashboard</h1>
+        </div>
+        <a href="/" class="btn btn-sm" target="_blank">Ver Sitio →</a>
+      </header>
+
+      <!-- Metrics -->
+      <section class="metrics-grid">
+        <div class="metric-card">
+          <div class="metric-icon icon-default">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+          </div>
+          <div class="metric-info">
+            <p class="metric-label">Total Invitados</p>
+            <p class="metric-value">{totalGuests}</p>
+          </div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-icon icon-success">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+          </div>
+          <div class="metric-info">
+            <p class="metric-label">Confirmados</p>
+            <p class="metric-value success">{confirmedGuests}</p>
+          </div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-icon icon-warning">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          </div>
+          <div class="metric-info">
+            <p class="metric-label">Pendientes</p>
+            <p class="metric-value warning">{pendingGuests}</p>
+          </div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-icon icon-danger">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+          </div>
+          <div class="metric-info">
+            <p class="metric-label">Declinados</p>
+            <p class="metric-value danger">{declinedGuests}</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- CSV Import -->
+      <section class="csv-section">
+        <div class="csv-header">
+          <div>
+            <h2 class="section-title">Importar Invitados (CSV)</h2>
+            <p class="section-desc">Formato: <code>nombre,pases,grupo_familiar,dieta</code> — una fila por invitado. La primera fila puede ser encabezado.</p>
+          </div>
+        </div>
+        {importMsg && <div class={`import-msg ${importMsg.startsWith('✓') ? 'success' : 'error'}`}>{importMsg}</div>}
+        {actionMsg && <div class="import-msg success">{actionMsg}</div>}
+        <div class="csv-area">
+          <form method="POST" class="csv-form">
+            <input type="hidden" name="_action" value="importCSV" />
+            <textarea name="csvContent" rows="6" placeholder="Juan Pérez,2,Familia Pérez,&#10;Ana García,1,,Vegana&#10;Carlos López,4,Amigos,"></textarea>
+            <button type="submit" class="btn btn-forest btn-sm">Importar CSV</button>
+          </form>
+          <div class="csv-hint">
+            <p>📋 <strong>Ejemplo de archivo CSV:</strong></p>
+            <pre>nombre,pases,grupo,dieta
+Juan Pérez,2,Familia,
+Ana García,1,,Vegana</pre>
+          </div>
+        </div>
+      </section>
+
+      <!-- Guest table -->
+      <section class="guest-section">
+        <div class="section-header">
+          <h2 class="section-title">Lista de Invitados</h2>
+          <span class="guest-count">{totalGuests} registros</span>
+        </div>
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr><th>Nombre</th><th>Grupo</th><th>Código</th><th>Pases</th><th>Estado</th><th>Dieta</th><th>Versículo</th><th>Acciones</th></tr>
+            </thead>
+            <tbody>
+              {allGuests.map(g => (
+                <tr>
+                  <td class="name-cell"><strong>{g.name}</strong></td>
+                  <td class="group-cell">{g.familyGroup ? <span class="badge-group">{g.familyGroup}</span> : <span class="empty-dash">—</span>}</td>
+                  <td class="code-cell">{g.uniqueCode}</td>
+                  <td class="center">{g.partySize}</td>
+                  <td><span class={`badge badge-${g.status}`}>{g.status === 'confirmed' ? '✓ Confirmado' : g.status === 'declined' ? '✗ Declinado' : '● Pendiente'}</span></td>
+                  <td class="diet-cell">{g.dietaryRestrictions || '—'}</td>
+                  <td class="center">
+                    <form method="POST" style="display:inline">
+                      <input type="hidden" name="_action" value="toggleVerse" />
+                      <input type="hidden" name="guestId" value={g.id} />
+                      <input type="hidden" name="value" value={g.showBibleVerse ? 'false' : 'true'} />
+                      <button type="submit" class={`verse-toggle ${g.showBibleVerse ? 'active' : ''}`} title={g.showBibleVerse ? 'Desactivar versículo' : 'Activar versículo'}>
+                        {g.showBibleVerse ? '📖 Sí' : '○ No'}
+                      </button>
+                    </form>
+                  </td>
+                  <td class="center">
+                    {g.status !== 'pending' && (
+                      <form method="POST" style="display:inline">
+                        <input type="hidden" name="_action" value="resetStatus" />
+                        <input type="hidden" name="guestId" value={g.id} />
+                        <button type="submit" class="reset-btn" title="Restablecer a pendiente" onclick="return confirm('¿Restablecer a pendiente?')">↺ Reset</button>
+                      </form>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </div>
+</Layout>
+
+<style>
+  .admin-shell { display: flex; min-height: 100vh; background: #f4f5f7; font-family: 'Montserrat', sans-serif; }
+
+  .admin-shell { display: flex; min-height: 100vh; background: #f4f5f7; font-family: 'Montserrat', sans-serif; }
+
+  /* Main */
+  .admin-main { flex: 1; padding: 2.5rem 2rem; overflow-y: auto; }
+  .admin-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 2.5rem; flex-wrap: wrap; gap: 1rem; }
+  .header-eyebrow { font-size: 0.7rem; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase; color: var(--color-gold); margin: 0 0 0.25rem; }
+  .header-title { font-family: 'Cormorant Garamond', serif; font-size: 2.2rem; font-weight: 400; color: var(--color-forest); margin: 0; }
+
+  .btn { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.7rem 1.5rem; font-size: 0.8rem; font-family: 'Montserrat', sans-serif; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; border-radius: 50px; cursor: pointer; text-decoration: none; transition: all 0.25s; border: 2px solid; }
+  .btn-sm { font-size: 0.72rem; padding: 0.55rem 1.1rem; }
+  .btn-forest { background: var(--color-forest); color: white; border-color: var(--color-forest); }
+  .btn-forest:hover { background: transparent; color: var(--color-forest); }
+
+  /* Metrics */
+  .metrics-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1.25rem; margin-bottom: 2rem; }
+  .metric-card { background: #fff; border-radius: 14px; padding: 1.5rem; display: flex; gap: 1rem; align-items: center; box-shadow: 0 2px 12px rgba(44,74,62,0.06); transition: transform 0.25s, box-shadow 0.25s; }
+  .metric-card:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(44,74,62,0.1); }
+  .metric-icon { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .metric-icon svg { width: 22px; height: 22px; }
+  .icon-default { background: rgba(44,74,62,0.1); color: var(--color-forest); }
+  .icon-success { background: rgba(39,174,96,0.12); color: #27ae60; }
+  .icon-warning { background: rgba(241,196,15,0.15); color: #d4a017; }
+  .icon-danger  { background: rgba(192,57,43,0.1); color: var(--error); }
+  .metric-label { font-size: 0.72rem; font-weight: 500; color: var(--color-text-muted); margin: 0 0 0.35rem; text-transform: uppercase; letter-spacing: 0.05em; }
+  .metric-value { font-size: 2rem; font-weight: 700; margin: 0; color: var(--color-text); }
+  .metric-value.success { color: #27ae60; }
+  .metric-value.warning { color: #d4a017; }
+  .metric-value.danger  { color: var(--error); }
+
+  /* CSV Section */
+  .csv-section { background: #fff; border-radius: 14px; padding: 2rem; margin-bottom: 2rem; box-shadow: 0 2px 12px rgba(44,74,62,0.06); }
+  .csv-header { margin-bottom: 1.25rem; }
+  .section-title { font-family: 'Cormorant Garamond', serif; font-size: 1.4rem; font-weight: 400; color: var(--color-forest); margin: 0 0 0.25rem; }
+  .section-desc { font-size: 0.82rem; color: var(--color-text-muted); margin: 0; }
+  .section-desc code { background: #f0f0f0; padding: 0.1rem 0.4rem; border-radius: 4px; font-size: 0.8rem; }
+  .import-msg { padding: 0.75rem 1rem; border-radius: 10px; font-size: 0.85rem; font-weight: 500; margin-bottom: 1rem; }
+  .import-msg.success { background: #e6f6ec; color: #1e8449; border: 1px solid #a9dfbf; }
+  .import-msg.error   { background: #fdecea; color: #c0392b; border: 1px solid #f1b4b0; }
+  .csv-area { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+  @media (max-width: 700px) { .csv-area { grid-template-columns: 1fr; } }
+  .csv-form { display: flex; flex-direction: column; gap: 0.75rem; }
+  .csv-form textarea { width: 100%; padding: 0.85rem 1rem; border: 1.5px solid #e0e0e0; border-radius: 10px; font-family: 'Montserrat', monospace; font-size: 0.82rem; color: #333; resize: vertical; box-sizing: border-box; transition: border-color 0.25s; }
+  .csv-form textarea:focus { outline: none; border-color: var(--color-gold); }
+  .csv-hint { background: #f8f9fa; border-radius: 10px; padding: 1rem 1.25rem; font-size: 0.82rem; color: #555; }
+  .csv-hint p { margin: 0 0 0.5rem; }
+  .csv-hint pre { margin: 0; font-family: monospace; white-space: pre-wrap; color: var(--color-forest); background: #eef4f1; padding: 0.75rem; border-radius: 6px; }
+
+  /* Guest section */
+  .guest-section { background: #fff; border-radius: 14px; box-shadow: 0 2px 12px rgba(44,74,62,0.06); overflow: hidden; }
+  .section-header { display: flex; align-items: center; justify-content: space-between; padding: 1.5rem 1.75rem; border-bottom: 1px solid #f0f0f0; }
+  .guest-count { font-size: 0.8rem; color: var(--color-text-muted); background: #f4f5f7; padding: 0.3rem 0.75rem; border-radius: 20px; }
+  .table-wrapper { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; }
+  th { padding: 0.85rem 1.25rem; text-align: left; font-size: 0.72rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-text-muted); background: #fafafa; border-bottom: 1px solid #eee; }
+  td { padding: 1rem 1.25rem; font-size: 0.88rem; border-bottom: 1px solid #f4f4f4; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: #fafdf9; }
+  .name-cell { font-weight: 500; }
+  .code-cell { font-family: monospace; font-size: 0.82rem; color: var(--color-text-muted); }
+  .center { text-align: center; }
+  .diet-cell { color: var(--color-text-muted); font-size: 0.85rem; }
+  .badge { display: inline-block; padding: 0.28rem 0.7rem; border-radius: 20px; font-size: 0.78rem; font-weight: 600; }
+  .badge-confirmed { background: #e6f6ec; color: #1e8449; }
+  .badge-pending   { background: #fef9e7; color: #b7770d; }
+  .badge-declined  { background: #fdecea; color: #c0392b; }
+  .verse-toggle { background: none; border: 1px solid #e0e0e0; border-radius: 6px; cursor: pointer; padding: 0.25rem 0.5rem; font-size: 0.78rem; font-family: 'Montserrat', sans-serif; transition: all 0.2s; }
+  .verse-toggle.active { background: #fff8e6; border-color: var(--color-gold); color: var(--color-forest); }
+  .reset-btn { background: none; border: 1px solid #e0e0e0; border-radius: 6px; cursor: pointer; padding: 0.25rem 0.55rem; font-size: 0.78rem; font-family: 'Montserrat', sans-serif; transition: background 0.2s; color: #666; }
+  .reset-btn:hover { background: #f0f0f0; }
+
+  @media (max-width: 768px) {
+    .admin-shell { flex-direction: column; }
+    .sidebar { width: 100%; height: auto; position: static; flex-direction: row; flex-wrap: wrap; padding: 1rem; }
+    .sidebar-brand { border-bottom: none; padding-bottom: 0; margin-bottom: 0; }
+    .sidebar-nav { flex-direction: row; flex-wrap: wrap; padding: 0; margin-left: auto; }
+  }
+</style>
