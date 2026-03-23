@@ -1,0 +1,200 @@
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Montserrat:wght@300;400;500;600;700&display=swap');
+
+:root {
+  --color-forest:      #2c4a3e;
+  --color-forest-mid:  #3d6b5a;
+  --color-forest-light:#5a8c73;
+  --color-gold:        #c9a96e;
+  --color-gold-light:  #e0c99b;
+  --color-ivory:       #faf6f0;
+  --color-ivory-dark:  #f0eae0;
+  --color-text:        #1a1a1a;
+  --color-text-muted:  #6b6b6b;
+  --color-white:       #ffffff;
+
+  /* Aliases */
+  --primary:      var(--color-gold);
+  --primary-dark: var(--color-forest);
+  --bg-color:     var(--color-ivory);
+  --text-main:    var(--color-text);
+  --text-muted:   var(--color-text-muted);
+  --sage-green:   var(--color-forest-mid);
+  --error:        #c0392b;
+  --success:      #27ae60;
+
+  /* Global radius tokens */
+  --radius-sm:   8px;
+  --radius-md:   16px;
+  --radius-lg:   24px;
+  --radius-pill: 50px;
+}
+
+html { scroll-behavior: smooth; }
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: 'Montserrat', system-ui, sans-serif;
+  font-weight: 400;
+  background-color: var(--color-ivory);
+  color: var(--color-text);
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4, .serif {
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 400;
+  line-height: 1.15;
+}
+
+/* ── Glassmorphism ── */
+.glass {
+  background: rgba(255, 255, 255, 0.65);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  box-shadow: 0 8px 40px rgba(44, 74, 62, 0.08);
+}
+
+/* ── Buttons — now pill shaped ── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background-color: var(--color-gold);
+  color: var(--color-forest);
+  border: 2px solid var(--color-gold);
+  padding: 0.85rem 2.4rem;
+  font-size: 0.8rem;
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 600;
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  transition: background-color 0.3s ease, color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  text-decoration: none;
+}
+
+.btn:hover {
+  background-color: transparent;
+  color: var(--color-gold);
+  border-color: var(--color-gold);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(201, 169, 110, 0.35);
+}
+
+.btn:disabled {
+  background-color: #ccc;
+  border-color: #ccc;
+  color: #fff;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btn-outline {
+  background-color: transparent;
+  color: var(--color-gold);
+  border-color: var(--color-gold);
+}
+.btn-outline:hover {
+  background-color: var(--color-gold);
+  color: var(--color-forest);
+}
+
+/* ── Section ornament ── */
+.section-ornament {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin: 1rem auto 2rem;
+}
+.section-ornament::before,
+.section-ornament::after {
+  content: '';
+  flex: 1;
+  max-width: 80px;
+  height: 1px;
+  background: var(--color-gold);
+  opacity: 0.6;
+}
+.section-ornament span {
+  font-size: 1.2rem;
+  color: var(--color-gold);
+  opacity: 0.8;
+}
+
+/* ── Animations ── */
+.fade-up {
+  opacity: 0;
+  transform: translateY(32px);
+  transition: opacity 0.9s ease-out, transform 0.9s ease-out;
+}
+.fade-up.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fade-up {
+    transition: none !important;
+    transform: none !important;
+    opacity: 1 !important;
+  }
+}
+
+/* ── Donation CTA banner ── */
+.donation-cta {
+  background: linear-gradient(135deg, var(--color-forest), #1a3329);
+  padding: 3rem 2rem;
+}
+.donation-cta-inner {
+  max-width: 900px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+.donation-icon { font-size: 2.5rem; flex-shrink: 0; }
+.donation-cta-inner > div { flex: 1; min-width: 200px; }
+.donation-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.6rem;
+  color: var(--color-gold-light);
+  margin: 0 0 0.35rem;
+  font-weight: 400;
+}
+.donation-subtitle {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 0.85rem;
+  color: rgba(255,255,255,0.65);
+  margin: 0;
+  line-height: 1.6;
+}
+.btn-donation {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.85rem 1.75rem;
+  background: var(--color-gold);
+  color: var(--color-forest);
+  font-family: 'Montserrat', sans-serif;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-decoration: none;
+  border-radius: 50px;
+  transition: all 0.25s;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+.btn-donation:hover {
+  background: var(--color-gold-light);
+  transform: translateY(-2px);
+}
+

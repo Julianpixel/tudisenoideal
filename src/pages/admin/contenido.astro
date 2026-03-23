@@ -1,0 +1,186 @@
+---
+export const prerender = false;
+import Layout from '../../layouts/Layout.astro';
+import Sidebar from '../../components/admin/Sidebar.astro';
+import { db, Settings, eq } from 'astro:db';
+
+let successMsg = '';
+let errorMsg   = '';
+
+if (Astro.request.method === 'POST') {
+  try {
+    const form = await Astro.request.formData();
+    await db.update(Settings).set({
+      weddingDate:     (form.get('weddingDate')     as string) || '',
+      ceremonyTime:    (form.get('ceremonyTime')    as string) || '',
+      receptionTime:   (form.get('receptionTime')   as string) || '',
+      ceremonyVenue:   (form.get('ceremonyVenue')   as string) || '',
+      ceremonyAddress: (form.get('ceremonyAddress') as string) || '',
+      receptionVenue:  (form.get('receptionVenue')  as string) || '',
+      receptionAddress:(form.get('receptionAddress')as string) || '',
+      heroTitle:       (form.get('heroTitle')       as string) || '',
+      heroSubtitle:    (form.get('heroSubtitle')    as string) || '',
+      mapEmbedUrl:     (form.get('mapEmbedUrl')     as string) || '',
+      updatedAt: new Date(),
+    }).where(eq(Settings.id, 1));
+    successMsg = '✓ Configuración guardada correctamente.';
+  } catch (e) {
+    errorMsg = `Error: ${e instanceof Error ? e.message : 'Error desconocido'}`;
+  }
+}
+
+const rows = await db.select().from(Settings);
+const s = rows[0];
+---
+<Layout>
+  <div class="admin-shell">
+    <aside class="sidebar">
+      <div class="sidebar-brand">
+        <span class="brand-icon">❧</span>
+        <span class="brand-name">Wedding<br/>Admin</span>
+      </div>
+      <nav class="sidebar-nav">
+        <a href="/admin/dashboard" class="nav-item">📊 Dashboard</a>
+        <a href="/admin/contenido" class="nav-item active">✏️ Contenido</a>
+        <a href="/admin/galeria"   class="nav-item">🖼️ Galería</a>
+        <a href="/admin/mesas"     class="nav-item">🔵 Mesas</a>
+        <a href="/admin/logout"    class="nav-item nav-logout">🚪 Salir</a>
+      </nav>
+    </aside>
+
+    <main class="admin-main">
+      <header class="admin-header">
+        <div>
+          <p class="header-eyebrow">Panel de Administración</p>
+          <h1 class="header-title">Editar Contenido</h1>
+        </div>
+        <a href="/" class="btn btn-forest btn-sm" target="_blank">Ver Sitio →</a>
+      </header>
+
+      {successMsg && <div class="alert alert-success">{successMsg}</div>}
+      {errorMsg   && <div class="alert alert-error">{errorMsg}</div>}
+
+      <form method="POST" class="settings-form">
+        <div class="form-sections">
+
+          <!-- Hero info -->
+          <div class="form-card">
+            <h3 class="card-title">🏠 Hero — Encabezado del Sitio</h3>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="heroTitle">Título principal</label>
+                <input type="text" id="heroTitle" name="heroTitle" value={s?.heroTitle ?? ''} required />
+              </div>
+              <div class="form-group">
+                <label for="heroSubtitle">Subtítulo (fecha visible)</label>
+                <input type="text" id="heroSubtitle" name="heroSubtitle" value={s?.heroSubtitle ?? ''} required />
+              </div>
+            </div>
+          </div>
+
+          <!-- Wedding date -->
+          <div class="form-card">
+            <h3 class="card-title">📅 Fecha de la Boda (Cuenta Regresiva)</h3>
+            <div class="form-group">
+              <label for="weddingDate">Fecha ISO (YYYY-MM-DD)</label>
+              <input type="date" id="weddingDate" name="weddingDate" value={s?.weddingDate ?? ''} required />
+              <p class="hint">Esta fecha controla el contador regresivo en la página principal.</p>
+            </div>
+          </div>
+
+          <!-- Ceremony -->
+          <div class="form-card">
+            <h3 class="card-title">⛪ La Ceremonia</h3>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="ceremonyTime">Hora (ej: 16:00)</label>
+                <input type="text" id="ceremonyTime" name="ceremonyTime" value={s?.ceremonyTime ?? ''} />
+              </div>
+              <div class="form-group">
+                <label for="ceremonyVenue">Lugar</label>
+                <input type="text" id="ceremonyVenue" name="ceremonyVenue" value={s?.ceremonyVenue ?? ''} />
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="ceremonyAddress">Dirección completa</label>
+              <input type="text" id="ceremonyAddress" name="ceremonyAddress" value={s?.ceremonyAddress ?? ''} />
+            </div>
+          </div>
+
+          <!-- Reception -->
+          <div class="form-card">
+            <h3 class="card-title">🥂 La Recepción</h3>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="receptionTime">Hora (ej: 18:00)</label>
+                <input type="text" id="receptionTime" name="receptionTime" value={s?.receptionTime ?? ''} />
+              </div>
+              <div class="form-group">
+                <label for="receptionVenue">Lugar</label>
+                <input type="text" id="receptionVenue" name="receptionVenue" value={s?.receptionVenue ?? ''} />
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="receptionAddress">Dirección completa</label>
+              <input type="text" id="receptionAddress" name="receptionAddress" value={s?.receptionAddress ?? ''} />
+            </div>
+          </div>
+
+          <!-- Map -->
+          <div class="form-card">
+            <h3 class="card-title">🗺️ Mapa — URL de Embed</h3>
+            <div class="form-group">
+              <label for="mapEmbedUrl">URL del iframe de Google Maps</label>
+              <textarea id="mapEmbedUrl" name="mapEmbedUrl" rows="3">{s?.mapEmbedUrl ?? ''}</textarea>
+              <p class="hint">Ve a Google Maps → Compartir → Insertar mapa → copia la URL del src.</p>
+            </div>
+          </div>
+
+        </div>
+
+        <button type="submit" class="btn btn-forest">Guardar Cambios</button>
+      </form>
+    </main>
+  </div>
+</Layout>
+
+<style>
+  .admin-shell { display: flex; min-height: 100vh; background: #f4f5f7; font-family: 'Montserrat', sans-serif; }
+  .sidebar { width: 220px; flex-shrink: 0; background: var(--color-forest); display: flex; flex-direction: column; padding: 2rem 0; position: sticky; top: 0; height: 100vh; }
+  .sidebar-brand { display: flex; align-items: center; gap: 0.75rem; padding: 0 1.5rem 2rem; border-bottom: 1px solid rgba(255,255,255,0.1); margin-bottom: 1.5rem; }
+  .brand-icon { font-size: 1.5rem; color: var(--color-gold); }
+  .brand-name { font-family: 'Cormorant Garamond', serif; font-size: 1.1rem; line-height: 1.3; color: rgba(255,255,255,0.9); }
+  .sidebar-nav { display: flex; flex-direction: column; gap: 0.25rem; padding: 0 0.75rem; }
+  .nav-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem 0.85rem; border-radius: 10px; color: rgba(255,255,255,0.65); text-decoration: none; font-size: 0.85rem; font-weight: 500; transition: all 0.25s; }
+  .nav-item:hover { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.9); }
+  .nav-item.active { background: rgba(201,169,110,0.2); color: var(--color-gold-light); font-weight: 600; }
+  .nav-logout { margin-top: 1rem; }
+  .admin-main { flex: 1; padding: 2.5rem 2rem; overflow-y: auto; max-width: 900px; }
+  .admin-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem; }
+  .header-eyebrow { font-size: 0.7rem; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase; color: var(--color-gold); margin: 0 0 0.25rem; }
+  .header-title { font-family: 'Cormorant Garamond', serif; font-size: 2.2rem; font-weight: 400; color: var(--color-forest); margin: 0; }
+  .alert { padding: 0.85rem 1.25rem; border-radius: 10px; font-size: 0.85rem; font-weight: 500; margin-bottom: 1.5rem; }
+  .alert-success { background: #e6f6ec; color: #1e8449; border: 1px solid #a9dfbf; }
+  .alert-error   { background: #fdecea; color: #c0392b; border: 1px solid #f1b4b0; }
+  .settings-form { display: flex; flex-direction: column; gap: 1.5rem; }
+  .form-sections { display: flex; flex-direction: column; gap: 1.5rem; }
+  .form-card { background: #fff; border-radius: 14px; padding: 2rem; box-shadow: 0 2px 12px rgba(44,74,62,0.06); }
+  .card-title { font-family: 'Cormorant Garamond', serif; font-size: 1.3rem; color: var(--color-forest); margin: 0 0 1.5rem; border-bottom: 1px solid #f0f0f0; padding-bottom: 0.75rem; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  @media (max-width: 600px) { .form-row { grid-template-columns: 1fr; } }
+  .form-group { display: flex; flex-direction: column; gap: 0.4rem; margin-bottom: 1rem; }
+  .form-group:last-child { margin-bottom: 0; }
+  label { font-size: 0.75rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: #555; }
+  input[type="text"], input[type="date"], textarea {
+    padding: 0.8rem 1rem; border: 1.5px solid #e0e0e0; border-radius: 10px;
+    font-family: 'Montserrat', sans-serif; font-size: 0.9rem; color: #1a1a1a;
+    transition: border-color 0.25s; width: 100%; box-sizing: border-box;
+  }
+  input:focus, textarea:focus { outline: none; border-color: var(--color-gold); }
+  textarea { resize: vertical; }
+  .hint { font-size: 0.78rem; color: #999; margin: 0.25rem 0 0; }
+  .btn { display: inline-flex; align-items: center; justify-content: center; padding: 0.85rem 2.5rem; font-size: 0.82rem; font-family: 'Montserrat', sans-serif; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; border-radius: 50px; cursor: pointer; border: 2px solid; transition: all 0.25s; text-decoration: none; }
+  .btn-forest { background: var(--color-forest); color: white; border-color: var(--color-forest); }
+  .btn-forest:hover { background: transparent; color: var(--color-forest); }
+  .btn-sm { padding: 0.55rem 1.1rem; font-size: 0.72rem; }
+</style>

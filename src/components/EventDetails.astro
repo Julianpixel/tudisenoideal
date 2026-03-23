@@ -1,0 +1,178 @@
+---
+// EventDetails.astro — Dynamic content from Settings
+interface Props {
+  ceremonyTime: string;
+  receptionTime: string;
+  ceremonyVenue: string;
+  ceremonyAddress: string;
+  receptionVenue: string;
+  receptionAddress: string;
+}
+const { ceremonyTime, receptionTime, ceremonyVenue, ceremonyAddress, receptionVenue, receptionAddress } = Astro.props;
+---
+<section id="detalles" class="event-details fade-up">
+  <div class="container">
+    <p class="section-label">El Gran Día</p>
+    <h2 class="section-heading">Detalles del Evento</h2>
+    <div class="section-ornament"><span>❧</span></div>
+
+    <div class="event-grid">
+      <!-- Ceremonia -->
+      <div class="event-card">
+        <div class="card-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3">
+            <path d="M12 2L8 6H4l1 4-3 3 3 3-1 4h4l4 4 4-4h4l-1-4 3-3-3-3 1-4h-4z"/>
+          </svg>
+        </div>
+        <h3>La Ceremonia</h3>
+        <p class="event-time">{ceremonyTime} hrs</p>
+        <p class="event-venue">{ceremonyVenue}</p>
+        <p class="event-address">{ceremonyAddress}</p>
+      </div>
+
+      <!-- Recepción -->
+      <div class="event-card">
+        <div class="card-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3">
+            <path d="M3 3h18v4H3z"/>
+            <path d="M3 7v13a1 1 0 001 1h16a1 1 0 001-1V7"/>
+            <path d="M9 11v4m6-4v4"/>
+          </svg>
+        </div>
+        <h3>La Recepción</h3>
+        <p class="event-time">{receptionTime} hrs</p>
+        <p class="event-venue">{receptionVenue}</p>
+        <p class="event-address">{receptionAddress}</p>
+      </div>
+    </div>
+
+    <!-- Fun extras row -->
+    <div class="extras-row">
+      <div class="extra-item">
+        <span class="extra-icon">🥂</span>
+        <p>Cena & Open Bar</p>
+      </div>
+      <div class="extra-item">
+        <span class="extra-icon">💃</span>
+        <p>Pista de Baile</p>
+      </div>
+      <div class="extra-item">
+        <span class="extra-icon">📷</span>
+        <p>Photo Booth</p>
+      </div>
+      <div class="extra-item">
+        <span class="extra-icon">🌸</span>
+        <p>Decoración Floral</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .event-details {
+    padding: 8rem 1.5rem;
+    background-color: var(--color-ivory);
+    text-align: center;
+  }
+  .container {
+    max-width: 1000px;
+    margin: 0 auto;
+  }
+  .section-label {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.35em;
+    text-transform: uppercase;
+    color: var(--color-gold);
+    margin: 0 0 0.75rem;
+  }
+  .section-heading {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(2.2rem, 5vw, 3.5rem);
+    font-weight: 400;
+    color: var(--color-forest);
+    margin: 0 0 0.5rem;
+  }
+  .event-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 2rem;
+    margin-top: 3.5rem;
+  }
+  .event-card {
+    border: 1px solid rgba(201, 169, 110, 0.25);
+    padding: 3.5rem 2.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.6rem;
+    background: var(--color-white);
+    border-radius: var(--radius-lg);
+    transition: transform 0.35s ease, box-shadow 0.35s ease;
+    position: relative;
+    overflow: hidden;
+  }
+  .event-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, var(--color-gold), transparent);
+    transform: scaleX(0);
+    transition: transform 0.4s ease;
+  }
+  .event-card:hover { transform: translateY(-6px); box-shadow: 0 16px 48px rgba(44,74,62,0.12); }
+  .event-card:hover::before { transform: scaleX(1); }
+  .card-icon {
+    width: 56px; height: 56px;
+    border: 1px solid var(--color-gold-light);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 1rem;
+    color: var(--color-gold);
+  }
+  .card-icon svg { width: 24px; height: 24px; }
+  .event-card h3 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.9rem;
+    color: var(--color-forest);
+    margin: 0 0 0.5rem;
+  }
+  .event-time {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 600;
+    color: var(--color-gold);
+    font-size: 1.1rem;
+    letter-spacing: 0.05em;
+    margin: 0;
+  }
+  .event-venue { font-size: 1.05rem; margin: 0.2rem 0 0; font-weight: 500; }
+  .event-address { color: var(--color-text-muted); font-size: 0.88rem; margin: 0; }
+
+  /* ── Extras ── */
+  .extras-row {
+    display: flex;
+    justify-content: center;
+    gap: 2.5rem;
+    flex-wrap: wrap;
+    margin-top: 4rem;
+    padding: 2.5rem;
+    background: var(--color-forest);
+    border-radius: var(--radius-lg);
+  }
+  .extra-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    color: rgba(255,255,255,0.8);
+    font-size: 0.8rem;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .extra-item p { margin: 0; }
+  .extra-icon { font-size: 2rem; }
+</style>

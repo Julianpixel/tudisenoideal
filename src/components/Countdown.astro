@@ -1,0 +1,187 @@
+---
+// Countdown.astro — animated days/hours/minutes/seconds counter
+interface Props {
+  weddingDate: string; // ISO format: YYYY-MM-DD
+}
+const { weddingDate } = Astro.props;
+---
+<section class="countdown-section">
+  <div class="countdown-inner">
+    <p class="countdown-eyebrow">Faltan solo</p>
+    <div class="countdown-grid" id="countdown-grid">
+      <div class="countdown-unit">
+        <div class="flip-box"><span class="flip-value" id="cd-days">00</span></div>
+        <p class="flip-label">Días</p>
+      </div>
+      <div class="countdown-sep">❧</div>
+      <div class="countdown-unit">
+        <div class="flip-box"><span class="flip-value" id="cd-hours">00</span></div>
+        <p class="flip-label">Horas</p>
+      </div>
+      <div class="countdown-sep">❧</div>
+      <div class="countdown-unit">
+        <div class="flip-box"><span class="flip-value" id="cd-minutes">00</span></div>
+        <p class="flip-label">Minutos</p>
+      </div>
+      <div class="countdown-sep">❧</div>
+      <div class="countdown-unit">
+        <div class="flip-box"><span class="flip-value" id="cd-seconds">00</span></div>
+        <p class="flip-label">Segundos</p>
+      </div>
+    </div>
+    <p class="countdown-message" id="countdown-message"></p>
+  </div>
+</section>
+
+<script define:vars={{ weddingDate }}>
+  function pad(n) { return String(n).padStart(2, '0'); }
+
+  function tick() {
+    const target = new Date(weddingDate + 'T16:00:00');
+    const now = new Date();
+    const diff = target - now;
+
+    const msgEl = document.getElementById('countdown-message');
+
+    if (diff <= 0) {
+      document.getElementById('cd-days').textContent = '00';
+      document.getElementById('cd-hours').textContent = '00';
+      document.getElementById('cd-minutes').textContent = '00';
+      document.getElementById('cd-seconds').textContent = '00';
+      if (msgEl) msgEl.textContent = '¡El gran día ha llegado! 🎉';
+      return;
+    }
+
+    const days    = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const hours   = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+    const dEl = document.getElementById('cd-days');
+    const hEl = document.getElementById('cd-hours');
+    const mEl = document.getElementById('cd-minutes');
+    const sEl = document.getElementById('cd-seconds');
+
+    function updateWithFlip(el, val) {
+      if (!el || el.textContent === val) return;
+      el.classList.add('flip');
+      setTimeout(() => { el.textContent = val; el.classList.remove('flip'); }, 150);
+    }
+
+    updateWithFlip(dEl, pad(days));
+    updateWithFlip(hEl, pad(hours));
+    updateWithFlip(mEl, pad(minutes));
+    updateWithFlip(sEl, pad(seconds));
+    if (msgEl) msgEl.textContent = '';
+  }
+
+  tick();
+  setInterval(tick, 1000);
+</script>
+
+<style>
+  .countdown-section {
+    padding: 6rem 1.5rem;
+    background: var(--color-forest);
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .countdown-section::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: url('/hero-bg.jpg') center/cover no-repeat;
+    opacity: 0.08;
+    pointer-events: none;
+  }
+
+  .countdown-inner { position: relative; z-index: 1; }
+
+  .countdown-eyebrow {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.4em;
+    text-transform: uppercase;
+    color: var(--color-gold);
+    margin: 0 0 2rem;
+  }
+
+  .countdown-grid {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+  }
+
+  .countdown-unit {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .flip-box {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(201,169,110,0.3);
+    border-radius: 16px;
+    width: 100px;
+    height: 100px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .flip-value {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 3.5rem;
+    font-weight: 300;
+    color: #fff;
+    display: block;
+    transition: transform 0.15s ease, opacity 0.15s ease;
+  }
+
+  .flip-value.flip {
+    transform: translateY(-8px);
+    opacity: 0;
+  }
+
+  .flip-label {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.7rem;
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--color-gold-light);
+    margin: 0;
+    opacity: 0.8;
+  }
+
+  .countdown-sep {
+    font-size: 1.2rem;
+    color: var(--color-gold);
+    opacity: 0.5;
+    align-self: flex-start;
+    padding-top: 2.5rem;
+  }
+
+  .countdown-message {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.5rem;
+    color: var(--color-gold-light);
+    margin: 2rem 0 0;
+    font-style: italic;
+  }
+
+  @media (max-width: 600px) {
+    .flip-box { width: 72px; height: 72px; border-radius: 12px; }
+    .flip-value { font-size: 2.5rem; }
+    .countdown-sep { padding-top: 1.8rem; }
+    .countdown-grid { gap: 0.75rem; }
+  }
+</style>

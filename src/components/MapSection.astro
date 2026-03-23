@@ -1,0 +1,109 @@
+---
+// MapSection.astro — Dynamic venue info from Settings
+interface Props {
+  receptionVenue: string;
+  receptionAddress: string;
+  mapEmbedUrl: string;
+}
+const { receptionVenue, receptionAddress, mapEmbedUrl } = Astro.props;
+---
+<section class="map-section fade-up">
+  <div class="container">
+    <p class="section-label">Cómo Llegar</p>
+    <h2 class="section-heading">Ubicación</h2>
+    <div class="section-ornament"><span>❧</span></div>
+
+    <div class="map-card">
+      <div class="map-embed">
+        <iframe
+          src={mapEmbedUrl}
+          width="100%"
+          height="380"
+          style="border:0;"
+          allowfullscreen=""
+          loading="lazy"
+          referrerpolicy="no-referrer-when-downgrade">
+        </iframe>
+      </div>
+
+      <div class="map-info">
+        <div class="venue-block">
+          <svg class="venue-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
+            <circle cx="12" cy="9" r="2.5"/>
+          </svg>
+          <div>
+            <p class="venue-name">{receptionVenue}</p>
+            <p id="venue-address" class="venue-addr">{receptionAddress}</p>
+          </div>
+        </div>
+
+        <div class="map-actions">
+          <a href="https://goo.gl/maps/example" target="_blank" rel="noopener noreferrer" class="btn">Cómo Llegar</a>
+          <button id="copy-btn" class="btn btn-outline">Copiar Dirección</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  const copyBtn = document.getElementById('copy-btn');
+  const address = document.getElementById('venue-address')?.textContent;
+  copyBtn?.addEventListener('click', () => {
+    if (address) {
+      navigator.clipboard.writeText(address);
+      const original = copyBtn.textContent || '';
+      copyBtn.textContent = '¡Copiado!';
+      setTimeout(() => (copyBtn.textContent = original), 2000);
+    }
+  });
+</script>
+
+<style>
+  .map-section {
+    padding: 8rem 1.5rem;
+    background-color: var(--color-ivory-dark);
+    text-align: center;
+  }
+  .container { max-width: 960px; margin: 0 auto; }
+  .section-label {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.35em;
+    text-transform: uppercase;
+    color: var(--color-gold);
+    margin: 0 0 0.75rem;
+  }
+  .section-heading {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(2.2rem, 5vw, 3.5rem);
+    font-weight: 400;
+    color: var(--color-forest);
+    margin: 0 0 0.5rem;
+  }
+  .map-card {
+    border: 1px solid rgba(201, 169, 110, 0.22);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    background: var(--color-white);
+    margin-top: 3.5rem;
+    box-shadow: 0 12px 40px rgba(44, 74, 62, 0.08);
+  }
+  .map-embed iframe { display: block; filter: grayscale(20%) contrast(1.05); }
+  .map-info {
+    padding: 2.5rem 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    text-align: left;
+  }
+  .venue-block { display: flex; gap: 1rem; align-items: flex-start; }
+  .venue-icon { flex-shrink: 0; width: 24px; height: 24px; color: var(--color-gold); margin-top: 2px; }
+  .venue-name { font-family: 'Cormorant Garamond', serif; font-size: 1.3rem; font-weight: 600; color: var(--color-forest); margin: 0 0 0.2rem; }
+  .venue-addr { font-size: 0.9rem; color: var(--color-text-muted); margin: 0; }
+  .map-actions { display: flex; gap: 0.75rem; flex-wrap: wrap; }
+</style>

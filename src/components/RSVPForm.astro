@@ -1,0 +1,225 @@
+---
+// RSVPForm.astro — Premium rounded redesign, name-based + duplicate detection + Bible verse modal
+---
+<section id="rsvp" class="rsvp-section fade-up">
+  <div class="rsvp-inner">
+    <div class="rsvp-deco" aria-hidden="true">
+      <div class="deco-line"></div>
+      <span class="deco-icon">✿</span>
+      <div class="deco-line"></div>
+    </div>
+
+    <p class="section-label">Únete a Nosotros</p>
+    <h2 class="section-heading">Confirma tu Asistencia</h2>
+    <p class="subtitle">Escribe tu nombre tal como aparece en tu invitación.</p>
+
+    <form id="rsvp-form" class="rsvp-form" autocomplete="off">
+      <div class="form-group">
+        <label for="guestName">Nombre Completo</label>
+        <div class="input-wrapper">
+          <svg class="input-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          <input type="text" id="guestName" name="guestName" required placeholder="Ej: Juan Pérez" autocomplete="off" />
+        </div>
+        <p class="field-hint">Debe coincidir con el nombre y apellido en tu invitación.</p>
+      </div>
+
+      <div class="form-group">
+        <label for="partySize">Número de personas (incluyéndote)</label>
+        <div class="input-wrapper">
+          <svg class="input-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+          <input type="number" id="partySize" name="partySize" min="1" max="10" required value="1" />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>¿Asistirás?</label>
+        <div class="radio-group">
+          <label class="radio-option" for="status-yes">
+            <input type="radio" id="status-yes" name="status" value="confirmed" required checked />
+            <span class="radio-custom"></span>
+            <span class="radio-label">✓  Sí, ahí estaré</span>
+          </label>
+          <label class="radio-option" for="status-no">
+            <input type="radio" id="status-no" name="status" value="declined" />
+            <span class="radio-custom"></span>
+            <span class="radio-label">✗  No podré asistir</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="dietaryRestrictions">Restricciones Alimenticias <span class="optional">(Opcional)</span></label>
+        <div class="input-wrapper">
+          <input type="text" id="dietaryRestrictions" name="dietaryRestrictions" placeholder="Ej: Vegano, alergia al maní…" />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="notes">Mensaje para los novios <span class="optional">(opcional)</span></label>
+        <textarea id="notes" name="notes" rows="3" placeholder="Déjanos un mensaje especial… 💌"></textarea>
+      </div>
+
+      <button type="submit" id="submit-btn" class="btn submit-btn">
+        <span id="btn-text">Enviar Confirmación</span>
+      </button>
+      <div id="form-message" class="form-message"></div>
+    </form>
+  </div>
+</section>
+
+<!-- Bible Verse Modal -->
+<div id="verse-modal" class="verse-modal" aria-hidden="true" role="dialog">
+  <div class="verse-card">
+    <div class="verse-ornament">❧</div>
+    <p class="verse-subtitle" id="verse-guest-name"></p>
+    <h3 class="verse-title" id="verse-title">Un mensaje especial para ti</h3>
+    <blockquote class="verse-text" id="verse-text"></blockquote>
+    <cite class="verse-ref" id="verse-ref"></cite>
+    <button class="verse-close btn" id="verse-close-btn">Cerrar</button>
+  </div>
+</div>
+
+<script>
+  import { actions } from 'astro:actions';
+
+  const form = document.getElementById('rsvp-form') as HTMLFormElement;
+  const submitBtn = document.getElementById('submit-btn') as HTMLButtonElement;
+  const btnText = document.getElementById('btn-text')!;
+  const messageDiv = document.getElementById('form-message')!;
+  const modal = document.getElementById('verse-modal')!;
+  const verseTitle = document.getElementById('verse-title')!;
+  const verseText = document.getElementById('verse-text')!;
+  const verseRef = document.getElementById('verse-ref')!;
+  const verseGuestName = document.getElementById('verse-guest-name')!;
+  const verseCloseBtn = document.getElementById('verse-close-btn')!;
+
+  verseCloseBtn.addEventListener('click', () => {
+    modal.classList.remove('active');
+    modal.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+  });
+
+  form?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    submitBtn.disabled = true;
+    btnText.textContent = 'Enviando…';
+    messageDiv.textContent = '';
+    messageDiv.className = 'form-message';
+    messageDiv.style.display = 'none';
+
+    const formData = new FormData(form);
+    const { data, error } = await actions.rsvp.submitByName(formData);
+
+    submitBtn.disabled = false;
+    btnText.textContent = 'Enviar Confirmación';
+
+    if (error) {
+      messageDiv.innerHTML = `<span class="msg-icon">⚠️</span> ${error.message}`;
+      messageDiv.classList.add('error');
+      messageDiv.style.display = 'flex';
+      return;
+    }
+
+    if (data?.alreadyResponded) {
+      messageDiv.innerHTML = `<span class="msg-icon">ℹ️</span> <span>${data.message}</span>`;
+      messageDiv.classList.add('info');
+      messageDiv.style.display = 'flex';
+      return;
+    }
+
+    // Show success
+    messageDiv.innerHTML = `<span class="msg-icon">🎉</span> <span><strong>${data?.guestName}</strong> — ${data?.message}</span>`;
+    messageDiv.classList.add('success');
+    messageDiv.style.display = 'flex';
+    form.reset();
+
+    // Show Bible verse modal if applicable
+    if (data?.bibleVerse) {
+      verseGuestName.textContent = data.guestName ?? '';
+      verseTitle.textContent = data.bibleVerse.message;
+      verseText.textContent = `"${data.bibleVerse.text}"`;
+      verseRef.textContent = data.bibleVerse.ref;
+      modal.classList.add('active');
+      modal.setAttribute('aria-hidden', 'false');
+      document.body.style.overflow = 'hidden';
+    }
+  });
+</script>
+
+<style>
+  .rsvp-section {
+    padding: 8rem 1.5rem;
+    background: linear-gradient(160deg, var(--color-forest) 0%, #1a3329 100%);
+    display: flex;
+    justify-content: center;
+  }
+  .rsvp-inner { max-width: 640px; width: 100%; text-align: center; }
+  .rsvp-deco { display: flex; align-items: center; gap: 1rem; margin-bottom: 2.5rem; justify-content: center; }
+  .deco-line { width: 60px; height: 1px; background: rgba(201,169,110,0.45); }
+  .deco-icon { color: var(--color-gold); font-size: 1.1rem; opacity: 0.75; }
+  .section-label { font-family: 'Montserrat', sans-serif; font-size: 0.72rem; font-weight: 600; letter-spacing: 0.35em; text-transform: uppercase; color: var(--color-gold); margin: 0 0 0.75rem; }
+  .section-heading { font-family: 'Cormorant Garamond', serif; font-size: clamp(2rem, 5vw, 3rem); font-weight: 400; color: #fff; margin: 0 0 0.75rem; }
+  .subtitle { font-size: 0.9rem; color: rgba(255,255,255,0.6); margin: 0 0 3rem; line-height: 1.7; }
+  .rsvp-form { background: rgba(255,255,255,0.06); border: 1px solid rgba(201,169,110,0.2); backdrop-filter: blur(12px); padding: 2.5rem; text-align: left; border-radius: var(--radius-lg); }
+  .form-group { margin-bottom: 1.75rem; display: flex; flex-direction: column; gap: 0.5rem; }
+  label { font-family: 'Montserrat', sans-serif; font-size: 0.78rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(255,255,255,0.8); }
+  .optional { font-weight: 400; text-transform: none; letter-spacing: normal; color: rgba(255,255,255,0.4); font-size: 0.78rem; }
+  .field-hint { font-size: 0.78rem; color: rgba(255,255,255,0.38); margin: 0; }
+  .input-wrapper { position: relative; }
+  .input-icon { position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); width: 18px; height: 18px; color: var(--color-gold); opacity: 0.6; pointer-events: none; }
+  input[type="text"], input[type="number"] { width: 100%; padding: 0.9rem 1rem 0.9rem 3rem; background: rgba(255,255,255,0.08); border: 1.5px solid rgba(201,169,110,0.25); color: #fff; font-family: 'Montserrat', sans-serif; font-size: 0.95rem; border-radius: var(--radius-md); transition: border-color 0.3s, background 0.3s; box-sizing: border-box; }
+  input::placeholder { color: rgba(255,255,255,0.3); }
+  input:focus { outline: none; border-color: var(--color-gold); background: rgba(255,255,255,0.12); }
+  textarea { width: 100%; padding: 0.9rem 1rem; background: rgba(255,255,255,0.08); border: 1.5px solid rgba(201,169,110,0.25); color: #fff; font-family: 'Montserrat', sans-serif; font-size: 0.95rem; border-radius: var(--radius-md); resize: vertical; transition: border-color 0.3s; box-sizing: border-box; }
+  textarea::placeholder { color: rgba(255,255,255,0.3); }
+  textarea:focus { outline: none; border-color: var(--color-gold); }
+  .radio-group { display: flex; gap: 1rem; flex-wrap: wrap; }
+  .radio-option { display: flex; align-items: center; gap: 0.65rem; cursor: pointer; text-transform: none; letter-spacing: normal; font-size: 0.9rem; font-weight: 400; flex: 1; min-width: 180px; padding: 0.85rem 1rem; border: 1.5px solid rgba(201,169,110,0.2); border-radius: var(--radius-md); transition: border-color 0.3s, background 0.3s; }
+  .radio-option:has(input:checked) { border-color: var(--color-gold); background: rgba(201,169,110,0.12); }
+  .radio-option input[type="radio"] { display: none; }
+  .radio-custom { width: 18px; height: 18px; border: 1.5px solid rgba(201,169,110,0.5); border-radius: 50%; flex-shrink: 0; position: relative; transition: border-color 0.3s; }
+  .radio-option:has(input:checked) .radio-custom { border-color: var(--color-gold); }
+  .radio-option:has(input:checked) .radio-custom::after { content: ''; position: absolute; inset: 3px; background: var(--color-gold); border-radius: 50%; }
+  .radio-label { color: rgba(255,255,255,0.8); }
+  .submit-btn { width: 100%; margin-top: 0.5rem; padding: 1rem; font-size: 0.85rem; }
+  .form-message { display: none; margin-top: 1.25rem; padding: 1rem 1.25rem; font-size: 0.9rem; line-height: 1.6; align-items: flex-start; gap: 0.75rem; border-radius: var(--radius-md); }
+  .msg-icon { font-size: 1.2rem; flex-shrink: 0; }
+  .form-message.success { background: rgba(39,174,96,0.15); border: 1px solid rgba(39,174,96,0.4); color: #6fcf8e; }
+  .form-message.error   { background: rgba(192,57,43,0.15); border: 1px solid rgba(192,57,43,0.4); color: #e07b70; }
+  .form-message.info    { background: rgba(52,152,219,0.15); border: 1px solid rgba(52,152,219,0.4); color: #85c4e8; }
+
+  /* ── Bible Verse Modal ── */
+  .verse-modal {
+    position: fixed; inset: 0; z-index: 9998;
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(10,20,15,0.88);
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.4s ease;
+    padding: 1.5rem;
+    backdrop-filter: blur(8px);
+  }
+  .verse-modal.active { opacity: 1; pointer-events: all; }
+
+  .verse-card {
+    background: var(--color-ivory);
+    border-radius: 24px;
+    padding: 3.5rem 3rem;
+    max-width: 520px;
+    width: 100%;
+    text-align: center;
+    box-shadow: 0 32px 80px rgba(0,0,0,0.4);
+    animation: verseIn 0.5s cubic-bezier(0.34,1.56,0.64,1) forwards;
+    border-top: 4px solid var(--color-gold);
+  }
+  @keyframes verseIn {
+    from { transform: scale(0.85) translateY(20px); opacity: 0; }
+    to   { transform: scale(1) translateY(0); opacity: 1; }
+  }
+
+  .verse-ornament { font-size: 2rem; color: var(--color-gold); margin-bottom: 1rem; }
+  .verse-subtitle { font-family: 'Montserrat', sans-serif; font-size: 0.72rem; font-weight: 600; letter-spacing: 0.3em; text-transform: uppercase; color: var(--color-gold); margin: 0 0 0.5rem; }
+  .verse-title { font-family: 'Cormorant Garamond', serif; font-size: 1.6rem; color: var(--color-forest); margin: 0 0 1.5rem; line-height: 1.25; padding: 0 1rem; }
+  .verse-text { font-family: 'Montserrat', sans-serif; font-size: 0.95rem; font-style: normal; font-weight: 500; color: #333333; margin: 0 0 1.25rem; line-height: 1.6; border: none; padding: 0 1rem; quotes: none; letter-spacing: 0.02em; }
+  .verse-ref { font-family: 'Montserrat', sans-serif; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; color: var(--color-gold-light); display: block; margin-bottom: 2rem; background: var(--color-forest); padding: 0.4rem 1rem; border-radius: 20px; display: inline-block; }
+  .verse-close { font-size: 0.75rem; padding: 0.75rem 2rem; }
+</style>
