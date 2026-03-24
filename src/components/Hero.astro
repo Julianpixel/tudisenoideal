@@ -20,8 +20,8 @@ const { heroTitle, heroSubtitle, receptionVenue } = Astro.props;
   </div>
 
   <div class="hero-content fade-up visible">
-    <p class="eyebrow">Save the Date</p>
-
+    <div class="elegant-badge">¡Nos Casamos!</div>
+    
     <div class="title-wrapper">
       <h1 set:html={heroTitle.replace('&', '<span class="ampersand">&</span>')}></h1>
     </div>
@@ -31,12 +31,11 @@ const { heroTitle, heroSubtitle, receptionVenue } = Astro.props;
     </div>
 
     <p class="date-line">{heroSubtitle}</p>
-    <div class="hero-content">
-    <div class="elegant-badge">¡Nos Casamos!</div>
-    <h1 class="hero-title">{heroTitle}</h1>
-    <p class="hero-subtitle">{heroSubtitle}</p>
-    <a href="#rsvp" class="btn btn-outline btn-hero">Confirma tu asistencia</a>
-  </div>
+    
+    <div class="hero-cta">
+      <a href="#rsvp" class="btn btn-hero">Confirma tu asistencia</a>
+      <a href="/galeria" class="btn btn-outline-hero">Ver Galería</a>
+    </div>
   </div>
 
   <div class="scroll-hint" aria-hidden="true">
@@ -119,15 +118,19 @@ const { heroTitle, heroSubtitle, receptionVenue } = Astro.props;
     gap: 0;
   }
 
-  .eyebrow {
+  .elegant-badge {
     font-family: 'Montserrat', sans-serif;
-    font-size: 1rem;
+    font-size: 0.72rem;
     font-weight: 700;
     letter-spacing: 0.35em;
     text-transform: uppercase;
     color: var(--color-gold-light);
-    margin: 0 0 1.8rem;
-    text-shadow: 0 2px 8px rgba(0,0,0,0.6);
+    margin-bottom: 2rem;
+    padding: 0.5rem 1.5rem;
+    border: 1px solid rgba(224, 201, 155, 0.3);
+    border-radius: var(--radius-pill);
+    background: rgba(44, 74, 62, 0.4);
+    backdrop-filter: blur(4px);
   }
 
   .title-wrapper h1 {
@@ -202,10 +205,22 @@ const { heroTitle, heroSubtitle, receptionVenue } = Astro.props;
     text-decoration: none;
     transition: all 0.3s ease;
   }
+  .btn-outline-hero {
+    background: transparent;
+    color: #ffffff;
+    border: 2px solid rgba(255, 255, 255, 0.4);
+  }
   .btn-outline-hero:hover {
-    background: rgba(255,255,255,0.15);
-    border-color: rgba(255,255,255,0.8);
-    transform: translateY(-2px);
+    background: rgba(255, 255, 255, 0.1);
+    border-color: #ffffff;
+  }
+
+  @media (max-width: 768px) {
+    .hero-section { padding: 4rem 1rem; }
+    .title-wrapper h1 { font-size: 4rem; margin-bottom: 0.5rem; }
+    .hero-cta { flex-direction: column; width: 100%; max-width: 280px; gap: 0.75rem; }
+    .btn { width: 100%; padding: 1rem 1.5rem; }
+    .elegant-badge { font-size: 0.65rem; margin-bottom: 1.5rem; }
   }
 
   .scroll-hint {

@@ -146,6 +146,15 @@ h1, h2, h3, h4, .serif {
   }
 }
 
+@media (max-width: 600px) {
+  :root {
+    --radius-md: 12px;
+    --radius-lg: 16px;
+  }
+  body { font-size: 15px; }
+  .btn { padding: 0.75rem 1.8rem; font-size: 0.75rem; width: 100%; }
+}
+
 /* ── Donation CTA banner ── */
 .donation-cta {
   background: linear-gradient(135deg, var(--color-forest), #1a3329);
@@ -196,5 +205,11 @@ h1, h2, h3, h4, .serif {
 .btn-donation:hover {
   background: var(--color-gold-light);
   transform: translateY(-2px);
+}
+
+@media (max-width: 768px) {
+  .donation-cta-inner { flex-direction: column; text-align: center; gap: 2rem; }
+  .donation-title { font-size: 1.4rem; }
+  .btn-donation { width: 100%; justify-content: center; }
 }
 
