@@ -8,32 +8,25 @@ const { currentPath } = Astro.props;
   </div>
   <nav class="sidebar-nav">
     <a href="/admin/dashboard" class={`nav-item ${currentPath === '/admin/dashboard' ? 'active' : ''}`}>
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/></svg>
-      Dashboard
+      <span>📊</span> Dashboard
     </a>
     <a href="/admin/contenido" class={`nav-item ${currentPath === '/admin/contenido' ? 'active' : ''}`}>
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-      Contenido
+      <span>✏️</span> Contenido
     </a>
     <a href="/admin/galeria" class={`nav-item ${currentPath === '/admin/galeria' ? 'active' : ''}`}>
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-      Galería
+      <span>🖼️</span> Galería
     </a>
     <a href="/admin/mesas" class={`nav-item ${currentPath === '/admin/mesas' ? 'active' : ''}`}>
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3"/></svg>
-      Mesas
+      <span>🪑</span> Mesas
     </a>
     <a href="/admin/grupos" class={`nav-item ${currentPath === '/admin/grupos' ? 'active' : ''}`}>
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
-      Grupos Familiares
+      <span>👥</span> Grupos
     </a>
     <a href="/admin/donaciones" class={`nav-item ${currentPath === '/admin/donaciones' ? 'active' : ''}`}>
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
-      Donaciones
+      <span>💳</span> Donaciones
     </a>
     <a href="/admin/logout" class="nav-item nav-logout">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>
-      Cerrar Sesión
+      <span>🚪</span> Salir
     </a>
   </nav>
 </aside>
@@ -51,12 +44,24 @@ const { currentPath } = Astro.props;
   .nav-logout { margin-top: auto; }
 
   @media (max-width: 768px) {
-    .sidebar { width: 100%; height: auto; min-height: auto; position: sticky; top: 0; flex-direction: row; padding: 0.6rem 0.75rem; border-bottom: 1px solid rgba(255,255,255,0.1); box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-    .sidebar-brand { padding: 0; border-bottom: none; margin-bottom: 0; margin-right: 1rem; }
-    .brand-name { display: none; } /* Hide text on mobile to save space */
-    .sidebar-nav { flex-direction: row; gap: 0.5rem; padding: 0; overflow-x: auto; scrollbar-width: none; -ms-overflow-style: none; }
-    .sidebar-nav::-webkit-scrollbar { display: none; }
-    .nav-item { padding: 0.5rem 0.85rem; font-size: 0.75rem; background: rgba(255,255,255,0.05); }
-    .nav-logout { margin-top: 0; margin-left: auto; }
+    .sidebar { 
+      width: 100% !important; 
+      height: auto !important; 
+      min-height: auto !important; 
+      position: sticky !important; 
+      top: 0 !important; 
+      left: 0 !important;
+      flex-direction: row !important; 
+      padding: 0.6rem 0.75rem !important; 
+      border-bottom: 2px solid rgba(255,255,255,0.1) !important; 
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2) !important;
+      z-index: 9999 !important;
+    }
+    .sidebar-brand { padding: 0 !important; border-bottom: none !important; margin-bottom: 0 !important; margin-right: 1rem !important; }
+    .brand-name { display: none !important; }
+    .sidebar-nav { flex-direction: row !important; gap: 0.5rem !important; padding: 0 !important; overflow-x: auto !important; flex: 1 !important; scrollbar-width: none !important; }
+    .sidebar-nav::-webkit-scrollbar { display: none !important; }
+    .nav-item { padding: 0.5rem 0.75rem !important; font-size: 0.7rem !important; background: rgba(255,255,255,0.05) !important; border-radius: 8px !important; }
+    .nav-logout { margin-top: 0 !important; margin-left: auto !important; }
   }
 </style>
