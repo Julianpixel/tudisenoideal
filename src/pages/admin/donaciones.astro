@@ -274,15 +274,12 @@ import Sidebar from '../../components/admin/Sidebar.astro';
 </Layout>
 
 <style>
-  .admin-shell { display: flex; min-height: 100vh; background: #f4f5f7; font-family: 'Montserrat', sans-serif; }
-  .admin-main { flex: 1; padding: 2.5rem 2rem; overflow-y: auto; overflow-x: hidden; }
+  /* Local overrides or page-specific styles only */
   .admin-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem; }
   .header-eyebrow { font-size: 0.7rem; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase; color: var(--color-gold); margin: 0 0 0.25rem; }
   .header-title { font-family: 'Cormorant Garamond', serif; font-size: 2.2rem; font-weight: 400; color: var(--color-forest); margin: 0; }
   
   @media (max-width: 768px) {
-    .admin-shell { flex-direction: column; }
-    .admin-main { padding: 1.5rem 1rem; }
     .header-title { font-size: 1.8rem; }
   }
 

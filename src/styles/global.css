@@ -213,3 +213,28 @@ h1, h2, h3, h4, .serif {
   .btn-donation { width: 100%; justify-content: center; }
 }
 
+/* ── Admin Panel Core Layout ── */
+.admin-shell {
+  display: flex !important;
+  min-height: 100vh !important;
+  background-color: #f4f5f7 !important;
+  width: 100% !important;
+}
+
+.admin-main {
+  flex: 1 !important;
+  padding: 2.5rem 2rem !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  display: block !important;
+}
+
+@media (max-width: 1024px) {
+  .admin-shell {
+    flex-direction: column !important;
+  }
+  .admin-main {
+    padding: 1.25rem 1rem !important;
+    width: 100% !important;
+  }
+}
