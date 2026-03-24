@@ -196,10 +196,8 @@ Ana García,1,,Vegana</pre>
 <style>
   .admin-shell { display: flex; min-height: 100vh; background: #f4f5f7; font-family: 'Montserrat', sans-serif; }
 
-  .admin-shell { display: flex; min-height: 100vh; background: #f4f5f7; font-family: 'Montserrat', sans-serif; }
-
   /* Main */
-  .admin-main { flex: 1; padding: 2.5rem 2rem; overflow-y: auto; }
+  .admin-main { flex: 1; padding: 2.5rem 2rem; overflow-y: auto; overflow-x: hidden; }
   .admin-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 2.5rem; flex-wrap: wrap; gap: 1rem; }
   .header-eyebrow { font-size: 0.7rem; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase; color: var(--color-gold); margin: 0 0 0.25rem; }
   .header-title { font-family: 'Cormorant Garamond', serif; font-size: 2.2rem; font-weight: 400; color: var(--color-forest); margin: 0; }
@@ -268,8 +266,15 @@ Ana García,1,,Vegana</pre>
 
   @media (max-width: 768px) {
     .admin-shell { flex-direction: column; }
-    .sidebar { width: 100%; height: auto; position: static; flex-direction: row; flex-wrap: wrap; padding: 1rem; }
-    .sidebar-brand { border-bottom: none; padding-bottom: 0; margin-bottom: 0; }
-    .sidebar-nav { flex-direction: row; flex-wrap: wrap; padding: 0; margin-left: auto; }
+    .admin-main { padding: 1.5rem 1rem; }
+    .header-title { font-size: 1.8rem; }
+    .metrics-grid { grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+    .metric-card { padding: 1rem; gap: 0.75rem; }
+    .metric-value { font-size: 1.5rem; }
+    .csv-area { grid-template-columns: 1fr; }
+    .guest-section { border-radius: 0; margin-left: -1rem; margin-right: -1rem; }
+  }
+  @media (max-width: 480px) {
+    .metrics-grid { grid-template-columns: 1fr; }
   }
 </style>

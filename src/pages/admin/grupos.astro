@@ -238,17 +238,29 @@ const unassigned = allGuests.filter(g => !g.familyGroup);
 
 <style>
   .admin-shell { display: flex; min-height: 100vh; background: #f4f5f7; font-family: 'Montserrat', sans-serif; }
-  .admin-main { flex: 1; padding: 2.5rem 2rem; overflow-y: auto; max-width: 1000px; }
+  .admin-main { flex: 1; padding: 2.5rem 2rem; overflow-y: auto; overflow-x: hidden; }
   .admin-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem; }
   .header-eyebrow { font-size: 0.7rem; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase; color: var(--color-gold); margin: 0 0 0.25rem; }
   .header-title { font-family: 'Cormorant Garamond', serif; font-size: 2.2rem; font-weight: 400; color: var(--color-forest); margin: 0; }
+
+  @media (max-width: 768px) {
+    .admin-shell { flex-direction: column; }
+    .admin-main { padding: 1.5rem 1rem; }
+    .header-title { font-size: 1.8rem; }
+  }
   .alert { padding: 0.85rem 1.25rem; border-radius: 10px; font-size: 0.85rem; font-weight: 500; margin-bottom: 1.5rem; }
   
   .groups-manage { display: grid; grid-template-columns: 300px 1fr; gap: 1.5rem; margin-bottom: 2rem; align-items: start; }
   @media (max-width: 800px) { .groups-manage { grid-template-columns: 1fr; } }
   
   .planner-card, .groups-container { background: #fff; border-radius: 14px; padding: 2rem; box-shadow: 0 2px 12px rgba(44,74,62,0.06); }
+  @media (max-width: 600px) {
+    .planner-card, .groups-container { padding: 1.5rem 1rem; }
+  }
   .zone-unassigned { position: sticky; top: 2rem; max-height: calc(100vh - 4rem); overflow-y: auto; }
+  @media (max-width: 800px) {
+    .zone-unassigned { position: static; max-height: none; }
+  }
   .card-title { font-family: 'Cormorant Garamond', serif; font-size: 1.3rem; color: var(--color-forest); margin: 0 0 0.25rem; }
   .hint { font-size: 0.78rem; color: #888; margin: 0 0 1.5rem; line-height: 1.4; }
   
